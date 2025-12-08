@@ -5,24 +5,9 @@ with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
 with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
 with Ada.Exceptions;		use Ada.Exceptions;
-with LCA;
+with Fonctions_globales; use Fonctions_globales;
 
 procedure Routage_simple is
-
-   type Tab_Politique is (FIFO, LRU, LFU);
-
-	type T_Adresse_IP is mod 2 ** 32;
-
-   type T_Case is record
-      Masque : T_Adresse_IP;
-      Interface : String;
-   end record;
-   
-   package LCA_routeur_simple is new LCA (
-      T_Cle => T_Adresse_IP,
-      T_Valeur => T_Case
-   );
-   use LCA_routeur_simple;
 
 	Cache : Integer;
 	Politique: Tab_Politique;
@@ -171,43 +156,3 @@ begin
    Close (Entree);
 	Close (Sortie);
 end Routage_simple;
-
-
-function Traiter_c(Arg : in String; Cache : in out Integer) return Integer is
-begin
-	Cache := Integer(String);
-exception
-	when Constraint_Error => Put("Erreur : incompréhension après commande -c");
-end Traiter_c;
-
-
-function Traiter_p (Arg : in String; Politique : in out Tab_Politique) return Tab_Politique is
-begin
-   Politique := Arg;
-exception
-   when Constraint_Error => Put("Erreur : incompréhension après commande -p");
-end Traiter_p;
-
-
-function Traiter_t (Arg : in String; Table : in out String) return String is
-begin
-   Table := Arg;
-exception
-   when Constraint_Error => Put("Erreur : incompréhension après commande -t");
-end Traiter_t;
-
-
-function Traiter_q (Arg : in String; Paquet : in out String) return String is
-begin
-   Paquet := Arg;
-exception
-   when Constraint_Error => Put("Erreur : incompréhension après commmande -q");
-end Traiter_q;
-
-
-function Traiter_r (Arg: in String; Resultat : in out String) return String is
-begin
-   Resultat := Arg;
-exception
-   when Constraint_Error => Put("Erreur incompréhension après commande -r");
-end Traiter_r;
