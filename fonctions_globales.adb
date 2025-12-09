@@ -1,45 +1,64 @@
-with LCA;
+with Ada.Text_IO; use Ada.Text_IO;
+with Routeur_exceptions; use Routeur_exceptions;
 
 package body Fonctions_globales is
 
    -- Fonctions
-   function Traiter_c(Arg : in String; Cache : in out Integer) return Integer is
+   function Traiter_c(Arg : in String) return Integer is
    begin
-      Cache := Integer(String);
+      return Integer'Value(Arg);
    exception
-      when Constraint_Error => Put("Erreur : incompréhension après commande -c");
+      when Constraint_Error => 
+         Put("Erreur : incompréhension après commande -c");
+         raise Commande_Inconnu_Error;
    end Traiter_c;
 
 
-   function Traiter_p (Arg : in String; Politique : in out Tab_Politique) return Tab_Politique is
+   function Traiter_p (Arg : in String) return Tab_Politique is
    begin
-      Politique := Arg;
+      if Arg = "FIFO" then
+         return FIFO;
+      elsif Arg = "LRU" then
+         return LRU;
+      elsif Arg = "LFU" then
+         return LFU;
+      else
+         raise Constraint_Error;
+      end if;
    exception
-      when Constraint_Error => Put("Erreur : incompréhension après commande -p");
+      when Constraint_Error =>
+         Put("Erreur : incompréhension après commande -p");
+         raise Commande_Inconnu_Error;
    end Traiter_p;
 
 
-   function Traiter_t (Arg : in String; Table : in out String) return String is
+   function Traiter_t (Arg : in String) return String is
    begin
-      Table := Arg;
+      return Arg;
    exception
-      when Constraint_Error => Put("Erreur : incompréhension après commande -t");
+      when Constraint_Error => 
+         Put("Erreur : incompréhension après commande -t");
+         raise Commande_Inconnu_Error;
    end Traiter_t;
 
 
-   function Traiter_q (Arg : in String; Paquet : in out String) return String is
+   function Traiter_q (Arg : in String) return String is
    begin
-      Paquet := Arg;
+      return Arg;
    exception
-      when Constraint_Error => Put("Erreur : incompréhension après commmande -q");
+      when Constraint_Error => 
+         Put("Erreur : incompréhension après commmande -q");
+         raise Commande_Inconnu_Error;
    end Traiter_q;
 
 
-   function Traiter_r (Arg: in String; Resultat : in out String) return String is
+   function Traiter_r (Arg: in String) return String is
    begin
-      Resultat := Arg;
+      return Arg;
    exception
-      when Constraint_Error => Put("Erreur incompréhension après commande -r");
+      when Constraint_Error => 
+         Put("Erreur incompréhension après commande -r");
+         raise Commande_Inconnu_Error;
    end Traiter_r;
 
 
