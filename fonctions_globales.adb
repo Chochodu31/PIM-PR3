@@ -2,20 +2,6 @@ with LCA;
 
 package body Fonctions_globales is
 
-   
-	type T_Adresse_IP is mod 2 ** 32;
-
-   type T_Case is record
-      Masque : T_Adresse_IP;
-      Interface : String;
-   end record;
-   
-   package LCA_routeur_simple is new LCA (
-      T_Cle => T_Adresse_IP,
-      T_Valeur => T_Case
-   );
-   use LCA_routeur_simple;
-
    -- Fonctions
    function Traiter_c(Arg : in String; Cache : in out Integer) return Integer is
    begin
