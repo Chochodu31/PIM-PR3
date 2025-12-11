@@ -4,7 +4,7 @@ with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
 with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
 with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
-with Ada.Exceptions;		use Ada.Exceptions;
+--  with Ada.Exceptions;		use Ada.Exceptions;
 with Fonctions_globales; use Fonctions_globales;
 with LCA;
 with Sda_Exceptions;		use Sda_Exceptions;
@@ -12,32 +12,33 @@ with Routeur_exceptions; use Routeur_exceptions;
 
 procedure Routage_simple is
 
-   type T_Octet is mod 2**8;
+   --  type T_Octet is mod 2**8;
 
   	type T_Adresse_IP is mod 2 ** 32;
 
-	package Octet_IO is new Modular_IO (T_Octet);
-	use Octet_IO;
+	--  package Octet_IO is new Modular_IO (T_Octet);
+	--  use Octet_IO;
 
 	package Adresse_IP_IO is new Modular_IO (T_Adresse_IP);
 	use Adresse_IP_IO;
 
-	UN_OCTET: constant T_Adresse_IP := 2 ** 8;
+	--  UN_OCTET: constant T_Adresse_IP := 2 ** 8;
 
    type T_Case is record
+      Destination : T_Adresse_IP;
       Masque : T_Adresse_IP;
       Int : Unbounded_String;
    end record;
    
    package LCA_routeur_simple is new LCA (
-      T_Cle => T_Adresse_IP,
+      T_Cle => Integer,
       T_Valeur => T_Case
    );
    use LCA_routeur_simple;
 
-   procedure Afficher_Cle_Ad_IP(Cle: in T_Adresse_IP) is
+   procedure Afficher_Cle_Ad_IP(Cle: in Integer) is
    begin
-      Put("Cle");
+      Put(Cle);
    end Afficher_Cle_Ad_IP;
 
    procedure Afficher_Donnee_Enregistrement(Val: in T_Case) is
@@ -66,16 +67,16 @@ procedure Routage_simple is
    end id_ad_IP;
 
    -- Define the array type
-   type T_M is array (1 .. 5) of T_Adresse_IP;
+   --  type T_M is array (1 .. 5) of T_Adresse_IP;
 
    -- Declare an object of that type
-   M : constant T_M := (
-      5 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2) + (255 * UN_OCTET**1) + 255,
-      4 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2) + (255 * UN_OCTET**1),
-      3 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2),
-      2 => (255 * UN_OCTET**3),
-      1 => 0
-   );
+   --  M : constant T_M := (
+   --     5 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2) + (255 * UN_OCTET**1) + 255,
+   --     4 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2) + (255 * UN_OCTET**1),
+   --     3 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2),
+   --     2 => (255 * UN_OCTET**3),
+   --     1 => 0
+   --  );
 
 	Cache : Integer;
 	Politique: Tab_Politique;
@@ -94,6 +95,8 @@ procedure Routage_simple is
    Masque : T_Adresse_IP;
    Int : Unbounded_String;
    Adresse_IP : T_Adresse_IP;
+   Association : Integer;
+   Arg : Unbounded_String;
 	
 begin
    -- Comprendre la ligne de commande
@@ -111,13 +114,36 @@ begin
       -- Traiter la ligne de commande --------- Impossible de faire des cases avec des String => passage a des elsif
 		if Argument(Nb_cmd) = "-c" then
          -- Traiter cas c
-			Nb_cmd := Nb_cmd + 1;
-			Cache := Traiter_c(Argument(Nb_cmd));
+         begin
+			   Nb_cmd := Nb_cmd + 1;
+			   Cache := Integer'Value(Argument(Nb_cmd));
+         exception
+            when Constraint_Error => 
+               Put("Erreur : incompréhension après commande -c");
+               raise Commande_Inconnu_Error;
+         end;
+
 
       elsif Argument (Nb_cmd) = "-p" then 
          -- Traiter cas p
-			Nb_cmd := Nb_cmd + 1;
-			Politique := Traiter_p(Argument(Nb_cmd));
+         begin
+            Nb_cmd := Nb_cmd + 1;
+			   Arg := To_Unbounded_String(Argument(Nb_cmd));
+            if To_String(Arg) = "FIFO" then
+               Politique := FIFO;
+            elsif To_String(Arg) = "LRU" then
+               Politique := LRU;
+            elsif To_String(Arg) = "LFU" then
+               Politique := LFU;
+            else
+               raise Constraint_Error;
+            end if;
+         exception
+            when Constraint_Error =>
+            Put("Erreur : incompréhension après commande -p");
+            raise Commande_Inconnu_Error;
+         end;
+			
 
       elsif Argument(Nb_cmd) = "-s" then
          Statistique := True;
@@ -127,18 +153,38 @@ begin
 
       elsif Argument (Nb_cmd) = "-t" then
          -- Traiter cas t
-			Nb_cmd := Nb_cmd + 1;
-			Table := To_Unbounded_String(Traiter_t(Argument(Nb_cmd)));
+         begin
+            Nb_cmd := Nb_cmd + 1;
+			   Table := To_Unbounded_String(Argument(Nb_cmd));
+         exception
+            when Constraint_Error => 
+            Put("Erreur : incompréhension après commande -t");
+            raise Commande_Inconnu_Error;
+         end;
+			
 
       elsif Argument (Nb_cmd) = "-q" then
          -- Traiter cas q 
-			Nb_cmd := Nb_cmd + 1;
-			Paquet := To_Unbounded_String(Traiter_q(Argument(Nb_cmd)));
+         begin
+            Nb_cmd := Nb_cmd + 1;
+			   Paquet := To_Unbounded_String(Argument(Nb_cmd));
+         exception
+            when Constraint_Error => 
+            Put("Erreur : incompréhension après commmande -q");
+            raise Commande_Inconnu_Error;
+         end;
+			
 
       elsif Argument (Nb_cmd) = "-r" then
          -- Traiter cas r
-         Nb_cmd := Nb_cmd + 1;
-         Resultat := To_Unbounded_String(Traiter_r(Argument(Nb_cmd)));
+         begin
+            Nb_cmd := Nb_cmd + 1;
+            Resultat := To_Unbounded_String(Argument(Nb_cmd));
+         exception
+            when Constraint_Error => 
+            Put("Erreur incompréhension après commande -r");
+            raise Commande_Inconnu_Error;
+         end;
 
       else
          Put ("Erreur à l'argument : ");
@@ -187,25 +233,30 @@ begin
             Adresse_IP := id_ad_IP (To_String(Texte));
 
             -- Associer adresse IP et Interface
-            for i in 1..5 loop
+            Masque := 0;
+            Association := 0;
+            for i in 1..Taille(Tab_routage) loop
                begin
-                  Valeur := La_Valeur(Tab_routage, Adresse_IP AND M(i));
-                  Masque := Valeur.Masque;
-                  if not (Masque = M(i)) then
-                     raise Cle_Absente_Error;
+                  Valeur := La_Valeur(Tab_routage, i);
+                  if ((Adresse_IP and Valeur.Masque) = Valeur.Destination) and (Masque <= Valeur.Masque) then
+                     Association := Association + 1;
+                     Masque := Valeur.Masque;
+                     Int := Valeur.Int;
                   else
-                     Null;
+                     null;
                   end if;
-                  Int := Valeur.Int;
                exception
                   when Cle_Absente_Error => Null;
                end;
             end loop;
-
-            Put(Sortie, Adresse_IP);
-            Put(Sortie, " ");
-            Put(Sortie, Int);
-
+            if Association = 0 then
+               raise Adresse_IP_Introuvable_Error;
+            else
+               Put(Sortie, Adresse_IP);
+               Put(Sortie, " ");
+               Put(Sortie, Int);
+            end if;
+         
          else
             -- Identifier commande
             if Texte = "table" then
