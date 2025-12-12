@@ -6,56 +6,20 @@ with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
 --  with Ada.Exceptions;		use Ada.Exceptions;
 with Fonctions_globales; use Fonctions_globales;
-with LCA;
+use Fonctions_globales.Adresse_IP_IO;
+use Fonctions_globales.LCA_routeur_simple;
+--  with LCA;
 with Sda_Exceptions;		use Sda_Exceptions;
 with Routeur_exceptions; use Routeur_exceptions;
 
 procedure Routage_simple is
-
-   --  type T_Octet is mod 2**8;
-
-  	type T_Adresse_IP is mod 2 ** 32;
-
-	--  package Octet_IO is new Modular_IO (T_Octet);
-	--  use Octet_IO;
-
-	package Adresse_IP_IO is new Modular_IO (T_Adresse_IP);
-	use Adresse_IP_IO;
-
-	--  UN_OCTET: constant T_Adresse_IP := 2 ** 8;
-
-   type T_Case is record
-      Destination : T_Adresse_IP;
-      Masque : T_Adresse_IP;
-      Int : Unbounded_String;
-   end record;
-   
-   package LCA_routeur_simple is new LCA (
-      T_Cle => Integer,
-      T_Valeur => T_Case
-   );
-   use LCA_routeur_simple;
-
-   procedure Afficher_Cle_Ad_IP(Cle: in Integer) is
-   begin
-      Put(Cle);
-   end Afficher_Cle_Ad_IP;
-
-   procedure Afficher_Donnee_Enregistrement(Val: in T_Case) is
-   begin
-      Put("Enregistrement");
-   end Afficher_Donnee_Enregistrement;
-
-   procedure Afficher_Debug_routeur_simpe is new Afficher_Debug(
-      Afficher_Cle => Afficher_Cle_Ad_IP,
-      Afficher_Donnee => Afficher_Donnee_Enregistrement
-   );
 
    procedure table_routage(table : in String; LCA: in out T_LCA) is
       Enregistrement : T_Case;
    begin
       Enregistrement.Masque := -1;
       Enregistrement.Int := To_Unbounded_String("Salut");
+      Enregistrement.Destination := -1;
       Enregistrer (LCA, 1, Enregistrement);
    end table_routage;
 
@@ -65,18 +29,6 @@ procedure Routage_simple is
       t := -1;
       return t;
    end id_ad_IP;
-
-   -- Define the array type
-   --  type T_M is array (1 .. 5) of T_Adresse_IP;
-
-   -- Declare an object of that type
-   --  M : constant T_M := (
-   --     5 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2) + (255 * UN_OCTET**1) + 255,
-   --     4 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2) + (255 * UN_OCTET**1),
-   --     3 => (255 * UN_OCTET**3) + (255 * UN_OCTET**2),
-   --     2 => (255 * UN_OCTET**3),
-   --     1 => 0
-   --  );
 
 	Cache : Integer;
 	Politique: Tab_Politique;
