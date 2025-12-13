@@ -1,15 +1,6 @@
 with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
-with Ada.Text_IO.Unbounded_IO;  use Ada.Text_IO.Unbounded_IO;
 with LCA;
-with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
-
 with Ada.Text_IO;		use Ada.Text_IO;
-with Ada.Strings; 		use Ada.Strings;
-with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
-with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
-with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
-with Ada.Command_Line;		use Ada.Command_Line;
-
 
 package Fonctions_globales is
    type Tab_Politique is (FIFO, LRU, LFU);
@@ -38,5 +29,7 @@ package Fonctions_globales is
       Afficher_Donnee => Afficher_Donnee_Enregistrement
    );
 
-   procedure initialiser_table;
+   procedure table_routage(Table: in String; Tab_routage : in out T_LCA);
+
+   function id_ad_IP(Texte : in String) return T_Adresse_IP;
 end Fonctions_globales;
