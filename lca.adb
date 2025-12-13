@@ -198,6 +198,7 @@ package body LCA is
 			Afficher_Donnee (Compteur.All.Valeur);
 			Put ("]");
 			Compteur := Compteur.All.Suivant;
+         New_Line;
 		end loop;
 		Put ("--E");
 	end Afficher_Debug;

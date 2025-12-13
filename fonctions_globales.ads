@@ -20,7 +20,8 @@ package Fonctions_globales is
       T_Valeur => T_Case
    );
    use LCA_routeur_simple;
-
+   procedure Ecrire_Ad_IP(Sortie: in out File_Type; M1 : in T_Adresse_IP);
+   procedure Afficher_Ad_IP(M1 : T_Adresse_IP);
    procedure Afficher_Cle_Ad_IP(Cle: in Integer);
    procedure Afficher_Donnee_Enregistrement(Val: in T_Case);
 

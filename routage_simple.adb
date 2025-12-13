@@ -165,7 +165,12 @@ begin
 
          if IP_cmd then
             -- Identifier adresse IP
+            --  Put(To_String(Texte));
+            --  New_Line;
             Adresse_IP := id_ad_IP (To_String(Texte));
+            --  Afficher_Ad_IP (Adresse_IP);
+            --  New_Line;
+
 
             -- Associer adresse IP et Interface
             Masque := 0;
@@ -173,6 +178,21 @@ begin
             for i in 1..Taille(Tab_routage) loop
                begin
                   Valeur := La_Valeur(Tab_routage, i);
+                  --  Put("Adresse IP : ");
+                  --  New_Line;
+                  --  Put("Masque : ");
+                  --  Afficher_Ad_IP (Valeur.Masque);
+                  --  New_Line;
+                  --  Put("Destination : ");
+                  --  Afficher_Ad_IP (Valeur.Destination);
+                  --  New_Line;
+                  --  Put("Egalite : ");
+                  --  if (Adresse_IP and Valeur.Masque) = Valeur.Destination then
+                  --     Put("Vrai");
+                  --  else
+                  --     Put("Faux");
+                  --  end if;
+                  --  New_Line;
                   if ((Adresse_IP and Valeur.Masque) = Valeur.Destination) and (Masque <= Valeur.Masque) then
                      Association := Association + 1;
                      Masque := Valeur.Masque;
@@ -187,9 +207,10 @@ begin
             if Association = 0 then
                raise Adresse_IP_Introuvable_Error;
             else
-               Put(Sortie, Adresse_IP);
+               Ecrire_Ad_IP (Sortie, Adresse_IP);
                Put(Sortie, " ");
                Put(Sortie, Int);
+               New_Line (Sortie);
             end if;
          
          else

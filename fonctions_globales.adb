@@ -4,22 +4,45 @@ with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
 package body Fonctions_globales is
    type T_Octet is mod 2 ** 8;
    UN_OCTET: constant T_Adresse_IP := 2 ** 8;
+
+   procedure Afficher_Ad_IP(M1 : in T_Adresse_IP) is
+   begin
+      Put (Natural ((M1 / UN_OCTET ** 3) mod UN_OCTET), 1); 
+      Put (".");
+      Put (Natural ((M1 / UN_OCTET ** 2) mod UN_OCTET), 1); 
+      Put (".");
+      Put (Natural ((M1 / UN_OCTET ** 1) mod UN_OCTET), 1); 
+      Put (".");
+      Put (Natural  (M1 mod UN_OCTET), 1);
+   end Afficher_Ad_IP;
+
+   procedure Ecrire_Ad_IP(Sortie : in out File_Type; M1 : in T_Adresse_IP) is
+   begin
+      Put (Sortie, Natural ((M1 / UN_OCTET ** 3) mod UN_OCTET), 1); 
+      Put (Sortie, ".");
+      Put (Sortie, Natural ((M1 / UN_OCTET ** 2) mod UN_OCTET), 1); 
+      Put (sortie, ".");
+      Put (Sortie, Natural ((M1 / UN_OCTET ** 1) mod UN_OCTET), 1); 
+      Put (Sortie, ".");
+      Put (Sortie, Natural  (M1 mod UN_OCTET), 1);
+   end Ecrire_Ad_IP;
    
 
    procedure Afficher_Cle_Ad_IP(Cle: in Integer) is
    begin
-      Put(Cle);
+      Put(Cle, 1);
    end Afficher_Cle_Ad_IP;
 
 
    procedure Afficher_Donnee_Enregistrement(Val: in T_Case) is
    begin
       Put("(");
-      --  Put(Val.Destination);
-      --  Put(", ");
-      --  Put(Val.Masque);
-      --  Put(", ");
+      Afficher_Ad_IP(Val.Destination);
+      Put(", ");
+      Afficher_Ad_IP(Val.Masque);
+      Put(", ");
       Put(To_String(Val.Int));
+      Put(")");
    end Afficher_Donnee_Enregistrement;
 
 
@@ -32,7 +55,6 @@ package body Fonctions_globales is
       Enregistrement : T_Case;
       Destination : T_Adresse_IP;
       Masque : T_Adresse_IP;
-      --  Compteur : Integer;
       Tab : T_Tab;
       Int : Unbounded_String;
       Taille_Var : Integer;      
@@ -46,12 +68,17 @@ package body Fonctions_globales is
             raise Fichier_Inconnu_Error;
       end;
       while not End_Of_File (Entree) loop
+         --  Put("Passage ici");
+         --  New_Line;
          -- Comprendre la ligne
          Texte := To_Unbounded_String(Get_Line(Entree));
 
          -- Décomposer en trois éléments         
          Colonne := 1;
          Compteur_Espace := False;
+         Tab(1) := To_Unbounded_String("");
+         Tab(2) := To_Unbounded_String("");
+         Tab(3) := To_Unbounded_String("");
          for Compteur in 1..length(Texte) loop
             if To_String(Texte)(Compteur) = ' ' and Compteur_Espace then
                null;
@@ -63,9 +90,22 @@ package body Fonctions_globales is
                Tab(colonne):= Tab(colonne) & To_String(Texte)(compteur);                      
             end if;
          end loop;
+         --  Put("Destination : ");
+         --  Put(To_String(Tab(1)));
+         --  New_Line;
+         --  Put("Masque : ");
+         --  Put(To_String(Tab(2)));
+         --  New_Line;
+         --  Put("Interface : ");
+         --  Put(To_String(Tab(3)));
+         --  New_Line;
 
          -- Ajouter à Tab_Routage
+         --  Put("Passage à Masque : ");
+         --  New_Line;
          Masque := id_ad_IP(To_String(Tab(2)));
+         --  Put("Passage à Destination : ");
+         --  New_Line;
          Destination := id_ad_IP(To_String(Tab(1)));
          Int := Tab(3);
          Enregistrement.Masque := Masque;
@@ -90,6 +130,10 @@ package body Fonctions_globales is
    begin
       for i in 1..Length(To_Unbounded_String(Texte)) loop
          c := Texte(i);
+         --  Put("Character C : ");
+         --  Put(c);
+         --  New_Line;
+         --  Put(octets);
          if c = '.' then
             if indice_octet > 3 then
                raise Adresse_IP_Introuvable_Error;
@@ -106,6 +150,8 @@ package body Fonctions_globales is
             raise Adresse_IP_Introuvable_Error;
          end if;
       end loop;
+      octets(4) := T_Octet(valeur_courante);
+
       if indice_octet /= 4 then
          raise Adresse_IP_Introuvable_Error;
       end if;
@@ -113,8 +159,22 @@ package body Fonctions_globales is
          raise Adresse_IP_Introuvable_Error;
       end if;
 
+      --  Put("1 terme de octets : ");
+      --  Afficher_Ad_IP(T_Adresse_IP(octets(1)));
+      --  New_Line;
+      --  Put("2 terme de octets : ");
+      --  Afficher_Ad_IP(T_Adresse_IP(octets(2)));
+      --  New_Line;
+      --  Put("3 terme de octets : ");
+      --  Afficher_Ad_IP(T_Adresse_IP(octets(3)));
+      --  New_Line;
+      --  Put("Dernier terme de octets : ");
+      --  Afficher_Ad_IP(T_Adresse_IP(octets(4)));
+
       for i in 1..4 loop
          adresse_IP := adresse_IP * UN_OCTET + T_Adresse_IP(octets(i));
+         --  Afficher_Ad_IP(adresse_IP);
+         --  New_Line;
       end loop;
       return adresse_IP;
    end id_ad_IP;
