@@ -5,7 +5,6 @@ with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
 with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
 with Fonctions_globales; use Fonctions_globales;
-use Fonctions_globales.Adresse_IP_IO;
 use Fonctions_globales.LCA_routeur_simple;
 with Sda_Exceptions;		use Sda_Exceptions;
 with Routeur_exceptions; use Routeur_exceptions;
@@ -46,14 +45,14 @@ begin
 	while Nb_cmd <= Argument_Count loop
       
       -- Traiter la ligne de commande --------- Impossible de faire des cases avec des String => passage a des elsif
-		if Argument(Nb_cmd) = "-c" then
+		if Argument (Nb_cmd) = "-c" then
          -- Traiter cas c
          begin
 			   Nb_cmd := Nb_cmd + 1;
-			   Cache := Integer'Value(Argument(Nb_cmd));
+			   Cache := Integer'Value (Argument (Nb_cmd));
          exception
             when Constraint_Error => 
-               Put("Erreur : incompréhension après commande -c");
+               Put ("Erreur : incompréhension après commande -c");
                raise Commande_Inconnu_Error;
          end;
 
@@ -62,12 +61,12 @@ begin
          -- Traiter cas p
          begin
             Nb_cmd := Nb_cmd + 1;
-			   Arg := To_Unbounded_String(Argument(Nb_cmd));
-            if To_String(Arg) = "FIFO" then
+			   Arg := To_Unbounded_String (Argument (Nb_cmd));
+            if To_String (Arg) = "FIFO" then
                Politique := FIFO;
-            elsif To_String(Arg) = "LRU" then
+            elsif To_String (Arg) = "LRU" then
                Politique := LRU;
-            elsif To_String(Arg) = "LFU" then
+            elsif To_String (Arg) = "LFU" then
                Politique := LFU;
             else
                raise Constraint_Error;
@@ -131,11 +130,27 @@ begin
 
 
    -- Agir sur la ligne de commande
+   -- Agir selon Statistique
    if Statistique then
       Put("Rien à afficher car pas encore de cache");
    else
       Null;
    end if;
+
+   -- Agir selon Cache
+   if Cache = 0 then
+      Null;
+   else
+      Put("Pas pris en compte : ici on est à routage simple");
+   end if;
+
+   -- Agir selon Politique
+   if Politique in Tab_Politique then
+      Put("La politique n'est pas pris en charge car il n'y a pas de cache");
+   else
+      null;
+   end if;
+
 
    -- Créer la table de routage
    Initialiser (Tab_routage);
@@ -156,7 +171,7 @@ begin
       -- Traiter les paquets à router
       while not End_Of_File (Entree) loop
          -- Traiter le paquet à router
-         Texte := Get_Line(Entree);
+         Texte := Get_Line (Entree);
          Ligne := Integer (line(Entree));
          Trim(Texte, both);
 

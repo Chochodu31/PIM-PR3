@@ -76,9 +76,9 @@ package body Fonctions_globales is
          -- Décomposer en trois éléments         
          Colonne := 1;
          Compteur_Espace := False;
-         Tab(1) := To_Unbounded_String("");
-         Tab(2) := To_Unbounded_String("");
-         Tab(3) := To_Unbounded_String("");
+         Tab (1) := To_Unbounded_String ("");
+         Tab (2) := To_Unbounded_String ("");
+         Tab (3) := To_Unbounded_String ("");
          for Compteur in 1..length(Texte) loop
             if To_String(Texte)(Compteur) = ' ' and Compteur_Espace then
                null;
@@ -87,7 +87,7 @@ package body Fonctions_globales is
                colonne := colonne +1;
             else 
                compteur_espace := False;
-               Tab(colonne):= Tab(colonne) & To_String(Texte)(compteur);                      
+               Tab(colonne) := Tab(colonne) & To_String(Texte)(compteur);                      
             end if;
          end loop;
          --  Put("Destination : ");
