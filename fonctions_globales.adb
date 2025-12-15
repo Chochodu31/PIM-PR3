@@ -1,5 +1,6 @@
 with Routeur_exceptions; use Routeur_exceptions;
 with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
+with Ada.Command_Line;		use Ada.Command_Line;
 
 package body Fonctions_globales is
    type T_Octet is mod 2 ** 8;
@@ -68,8 +69,7 @@ package body Fonctions_globales is
             raise Fichier_Inconnu_Error;
       end;
       while not End_Of_File (Entree) loop
-         --  Put("Passage ici");
-         --  New_Line;
+
          -- Comprendre la ligne
          Texte := To_Unbounded_String(Get_Line(Entree));
 
@@ -90,22 +90,9 @@ package body Fonctions_globales is
                Tab(colonne) := Tab(colonne) & To_String(Texte)(compteur);                      
             end if;
          end loop;
-         --  Put("Destination : ");
-         --  Put(To_String(Tab(1)));
-         --  New_Line;
-         --  Put("Masque : ");
-         --  Put(To_String(Tab(2)));
-         --  New_Line;
-         --  Put("Interface : ");
-         --  Put(To_String(Tab(3)));
-         --  New_Line;
 
          -- Ajouter à Tab_Routage
-         --  Put("Passage à Masque : ");
-         --  New_Line;
          Masque := id_ad_IP(To_String(Tab(2)));
-         --  Put("Passage à Destination : ");
-         --  New_Line;
          Destination := id_ad_IP(To_String(Tab(1)));
          Int := Tab(3);
          Enregistrement.Masque := Masque;
@@ -130,10 +117,6 @@ package body Fonctions_globales is
    begin
       for i in 1..Length(To_Unbounded_String(Texte)) loop
          c := Texte(i);
-         --  Put("Character C : ");
-         --  Put(c);
-         --  New_Line;
-         --  Put(octets);
          if c = '.' then
             if indice_octet > 3 then
                raise Adresse_IP_Introuvable_Error;
@@ -159,24 +142,116 @@ package body Fonctions_globales is
          raise Adresse_IP_Introuvable_Error;
       end if;
 
-      --  Put("1 terme de octets : ");
-      --  Afficher_Ad_IP(T_Adresse_IP(octets(1)));
-      --  New_Line;
-      --  Put("2 terme de octets : ");
-      --  Afficher_Ad_IP(T_Adresse_IP(octets(2)));
-      --  New_Line;
-      --  Put("3 terme de octets : ");
-      --  Afficher_Ad_IP(T_Adresse_IP(octets(3)));
-      --  New_Line;
-      --  Put("Dernier terme de octets : ");
-      --  Afficher_Ad_IP(T_Adresse_IP(octets(4)));
-
       for i in 1..4 loop
          adresse_IP := adresse_IP * UN_OCTET + T_Adresse_IP(octets(i));
-         --  Afficher_Ad_IP(adresse_IP);
-         --  New_Line;
       end loop;
       return adresse_IP;
    end id_ad_IP;
+
+
+   procedure Gerer_commandes (Cache: in out Integer; 
+                              Politique : in out Tab_Politique; 
+                              Statistique : in out Boolean; 
+                              Table: in out Unbounded_String;
+                              Paquet : in out Unbounded_String;
+                              Resultat : in out Unbounded_String ) is
+      Nb_cmd : Integer;
+      Arg : Unbounded_String;
+   begin
+      Cache := 10;
+      Politique := FIFO;
+      Statistique := True;
+      Table := To_Unbounded_String("table.txt");
+      Paquet := To_Unbounded_String("paquets.txt");
+      Resultat := To_Unbounded_String("resultats.txt");
+
+      -- Gérer la ligne de commande
+      Nb_cmd := 1;
+      while Nb_cmd <= Argument_Count loop
+         
+         -- Traiter la ligne de commande
+         if Argument (Nb_cmd) = "-c" then
+            -- Traiter cas c
+            begin
+               Nb_cmd := Nb_cmd + 1;
+               Cache := Integer'Value (Argument (Nb_cmd));
+            exception
+               when Constraint_Error => 
+                  Put ("Erreur : incompréhension après commande -c");
+                  raise Commande_Inconnu_Error;
+            end;
+
+
+         elsif Argument (Nb_cmd) = "-p" then 
+            -- Traiter cas p
+            begin
+               Nb_cmd := Nb_cmd + 1;
+               Arg := To_Unbounded_String (Argument (Nb_cmd));
+               if To_String (Arg) = "FIFO" then
+                  Politique := FIFO;
+               elsif To_String (Arg) = "LRU" then
+                  Politique := LRU;
+               elsif To_String (Arg) = "LFU" then
+                  Politique := LFU;
+               else
+                  raise Constraint_Error;
+               end if;
+            exception
+               when Constraint_Error =>
+               Put("Erreur : incompréhension après commande -p");
+               raise Commande_Inconnu_Error;
+            end;
+            
+
+         elsif Argument(Nb_cmd) = "-s" then
+            Statistique := True;
+         
+         elsif Argument (Nb_cmd) = "-S" then
+            Statistique := False;
+
+         elsif Argument (Nb_cmd) = "-t" then
+            -- Traiter cas t
+            begin
+               Nb_cmd := Nb_cmd + 1;
+               Table := To_Unbounded_String(Argument(Nb_cmd));
+            exception
+               when Constraint_Error => 
+               Put("Erreur : incompréhension après commande -t");
+               raise Commande_Inconnu_Error;
+            end;
+            
+
+         elsif Argument (Nb_cmd) = "-q" then
+            -- Traiter cas q 
+            begin
+               Nb_cmd := Nb_cmd + 1;
+               Paquet := To_Unbounded_String(Argument(Nb_cmd));
+            exception
+               when Constraint_Error => 
+               Put("Erreur : incompréhension après commmande -q");
+               raise Commande_Inconnu_Error;
+            end;
+            
+
+         elsif Argument (Nb_cmd) = "-r" then
+            -- Traiter cas r
+            begin
+               Nb_cmd := Nb_cmd + 1;
+               Resultat := To_Unbounded_String(Argument(Nb_cmd));
+            exception
+               when Constraint_Error => 
+               Put("Erreur incompréhension après commande -r");
+               raise Commande_Inconnu_Error;
+            end;
+
+         else
+            Put ("Erreur à l'argument : ");
+            Put (Nb_cmd);
+            raise Commande_Inconnu_Error;
+         end if;
+
+         Nb_cmd := Nb_cmd + 1;
+      end loop;
+   end Gerer_commandes;
 
 end Fonctions_globales;

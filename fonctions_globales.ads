@@ -33,4 +33,11 @@ package Fonctions_globales is
    procedure table_routage(Table: in String; Tab_routage : in out T_LCA);
 
    function id_ad_IP(Texte : in String) return T_Adresse_IP;
+
+   procedure Gerer_commandes (Cache: in out Integer; 
+                              Politique : in out Tab_Politique; 
+                              Statistique : in out Boolean; 
+                              Table: in out Unbounded_String;
+                              Paquet : in out Unbounded_String;
+                              Resultat : in out Unbounded_String );
 end Fonctions_globales;
