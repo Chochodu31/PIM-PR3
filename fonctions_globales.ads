@@ -34,12 +34,12 @@ package Fonctions_globales is
 
    function id_ad_IP(Texte : in String) return T_Adresse_IP;
 
-   procedure Gerer_commandes (Cache: in out Integer; 
-                              Politique : in out Tab_Politique; 
-                              Statistique : in out Boolean; 
-                              Table: in out Unbounded_String;
-                              Paquet : in out Unbounded_String;
-                              Resultat : in out Unbounded_String );
+   procedure Gerer_commandes (Cache: out Integer; 
+                              Politique : out Tab_Politique; 
+                              Statistique : out Boolean; 
+                              Table : out Unbounded_String;
+                              Paquet : out Unbounded_String;
+                              Resultat : out Unbounded_String );
    
    procedure association_ad_des(Tab_Routage : in T_LCA; Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP);
 

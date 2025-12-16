@@ -150,12 +150,12 @@ package body Fonctions_globales is
    end id_ad_IP;
 
 
-   procedure Gerer_commandes (Cache: in out Integer; 
-                              Politique : in out Tab_Politique; 
-                              Statistique : in out Boolean; 
-                              Table: in out Unbounded_String;
-                              Paquet : in out Unbounded_String;
-                              Resultat : in out Unbounded_String ) is
+   procedure Gerer_commandes (Cache : out Integer; 
+                              Politique : out Tab_Politique; 
+                              Statistique : out Boolean; 
+                              Table : out Unbounded_String;
+                              Paquet : out Unbounded_String;
+                              Resultat : out Unbounded_String ) is
       Nb_cmd : Integer;
       Arg : Unbounded_String;
    begin
