@@ -9,19 +9,19 @@ with ada.Integer_Text_IO; use ada.Integer_Text_IO;
 
 procedure Routage_simple is
 
-	Cache : Integer;
-	Politique: Tab_Politique;
-	Statistique : Boolean;
-	Table : Unbounded_String;
-	Paquet : Unbounded_String;
-	Resultat : Unbounded_String;
-   Tab_routage : T_LCA;
-   Entree : File_Type;
-	Sortie : File_Type;
-   Texte : Unbounded_String;
-   Ligne : Integer;
-   IP_cmd : Boolean;
-   Adresse_IP : T_Adresse_IP;
+	Cache : Integer;  -- Taille du cache
+	Politique: Tab_Politique;  -- Politique de traitement de cache
+	Statistique : Boolean;  -- Affichage des statistiques
+	Table : Unbounded_String;  -- Nom du fichier contenant les éléments de la table de routage
+	Paquet : Unbounded_String; -- Nom du fichier contenant les éléments à router
+	Resultat : Unbounded_String;  -- Nom du fichier dans lequel écrire les résultats
+   Tab_routage : T_LCA; -- Table de routage
+   Entree : File_Type;  -- Fichier d'entrée
+	Sortie : File_Type;  -- Fichier de sortie
+   Texte : Unbounded_String;  -- Paquet à router
+   Ligne : Integer;  -- Numéro de ligne qu'on traite
+   IP_cmd : Boolean; -- Distinction entre commande ou paquet à router
+   Adresse_IP : T_Adresse_IP; -- Adresse_IP à router
 	
 begin
    -- Comprendre la ligne de commande
@@ -57,7 +57,6 @@ begin
          if IP_cmd then
             -- Identifier adresse IP
             Adresse_IP := Id_ad_IP (To_String(Texte));
-
 
             -- Associer adresse IP et Interface
             Association_ad_des(Tab_Routage,  Sortie, Adresse_IP);
