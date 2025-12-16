@@ -282,7 +282,7 @@ package body Fonctions_globales is
       else
          Ecrire_Ad_IP (Sortie, Adresse_IP);
          Put(Sortie, " ");
-         Put(Sortie, Int);
+         Put(Sortie, To_String(Int));
          New_Line (Sortie);
       end if;
    end association_ad_des;
