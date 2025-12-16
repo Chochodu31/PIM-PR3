@@ -292,7 +292,7 @@ package body Fonctions_globales is
    procedure identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA) is
    begin
       if Texte = "table" then
-         Afficher_Debug_routeur_simpe(Tab_routage);
+         Afficher_Debug_routeur_simple(Tab_routage);
                
       elsif Texte = "cache" then
          Put("Commande non programmé: affichage Cache");
