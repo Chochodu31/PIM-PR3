@@ -40,4 +40,9 @@ package Fonctions_globales is
                               Table: in out Unbounded_String;
                               Paquet : in out Unbounded_String;
                               Resultat : in out Unbounded_String );
+   
+   procedure association_ad_des(Tab_Routage : in T_LCA; Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP);
+
+   procedure identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA);
+
 end Fonctions_globales;

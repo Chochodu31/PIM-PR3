@@ -5,7 +5,6 @@ with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
 with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
 with Fonctions_globales; use Fonctions_globales;
 use Fonctions_globales.LCA_routeur_simple;
-with Sda_Exceptions;		use Sda_Exceptions;
 with Routeur_exceptions; use Routeur_exceptions;
 
 procedure Routage_simple is
@@ -88,51 +87,55 @@ begin
 
 
             -- Associer adresse IP et Interface
-            Masque := 0;
-            Association := 0;
-            for i in 1..Taille(Tab_routage) loop
-               begin
-                  Valeur := La_Valeur(Tab_routage, i);
-                  if ((Adresse_IP and Valeur.Masque) = Valeur.Destination) and (Masque <= Valeur.Masque) then
-                     Association := Association + 1;
-                     Masque := Valeur.Masque;
-                     Int := Valeur.Int;
-                  else
-                     null;
-                  end if;
-               exception
-                  when Cle_Absente_Error => Null;
-               end;
-            end loop;
-            if Association = 0 then
-               raise Adresse_IP_Introuvable_Error;
-            else
-               Ecrire_Ad_IP (Sortie, Adresse_IP);
-               Put(Sortie, " ");
-               Put(Sortie, Int);
-               New_Line (Sortie);
-            end if;
+            association_ad_des(Tab_Routage,  Sortie, Adresse_IP);
+
+            --  Masque := 0;
+            --  Association := 0;
+            --  for i in 1..Taille(Tab_routage) loop
+            --     begin
+            --        Valeur := La_Valeur(Tab_routage, i);
+            --        if ((Adresse_IP and Valeur.Masque) = Valeur.Destination) and (Masque <= Valeur.Masque) then
+            --           Association := Association + 1;
+            --           Masque := Valeur.Masque;
+            --           Int := Valeur.Int;
+            --        else
+            --           null;
+            --        end if;
+            --     exception
+            --        when Cle_Absente_Error => Null;
+            --     end;
+            --  end loop;
+            --  if Association = 0 then
+            --     raise Adresse_IP_Introuvable_Error;
+            --  else
+            --     Ecrire_Ad_IP (Sortie, Adresse_IP);
+            --     Put(Sortie, " ");
+            --     Put(Sortie, Int);
+            --     New_Line (Sortie);
+            --  end if;
          
          else
             -- Identifier commande
-            if Texte = "table" then
-               Afficher_Debug_routeur_simpe(Tab_routage);
+            identifier_commande (To_String(Texte), Ligne, Tab_routage);
+
+            --  if Texte = "table" then
+            --     Afficher_Debug_routeur_simpe(Tab_routage);
                
-            elsif Texte = "cache" then
-               Put("Commande non programmé: affichage Cache");
+            --  elsif Texte = "cache" then
+            --     Put("Commande non programmé: affichage Cache");
                
-            elsif Texte = "stat" then
-               Put("Commande non programmé: Affichafe stat Cache");
+            --  elsif Texte = "stat" then
+            --     Put("Commande non programmé: Affichafe stat Cache");
                
-            elsif Texte = "fin" then
-               raise End_Error;
+            --  elsif Texte = "fin" then
+            --     raise End_Error;
                
-            else 
-               -- Traiter erreur commande texte
-               Put ("Erreur à la ligne : ");
-               Put(Ligne);
-               raise Commande_Inconnu_Error;
-            end if;
+            --  else 
+            --     -- Traiter erreur commande texte
+            --     Put ("Erreur à la ligne : ");
+            --     Put(Ligne);
+            --     raise Commande_Inconnu_Error;
+         --     end if;
          end if;
       end loop;
    exception

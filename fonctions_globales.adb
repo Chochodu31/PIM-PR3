@@ -1,6 +1,7 @@
 with Routeur_exceptions; use Routeur_exceptions;
 with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
+with Sda_Exceptions;		use Sda_Exceptions;
 
 package body Fonctions_globales is
    type T_Octet is mod 2 ** 8;
@@ -253,5 +254,61 @@ package body Fonctions_globales is
          Nb_cmd := Nb_cmd + 1;
       end loop;
    end Gerer_commandes;
+
+   procedure association_ad_des(Tab_Routage : in T_LCA; Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP) is
+      Masque : T_Adresse_IP;
+      Association : Integer;
+      Valeur : T_Case;
+      Int : Unbounded_String;
+   begin
+      Masque := 0;
+      Association := 0;
+      for i in 1..Taille(Tab_routage) loop
+         begin
+            Valeur := La_Valeur(Tab_routage, i);
+            if ((Adresse_IP and Valeur.Masque) = Valeur.Destination) and (Masque <= Valeur.Masque) then
+               Association := Association + 1;
+               Masque := Valeur.Masque;
+               Int := Valeur.Int;
+            else
+               null;
+            end if;
+         exception
+            when Cle_Absente_Error => Null;
+         end;
+      end loop;
+      if Association = 0 then
+         raise Adresse_IP_Introuvable_Error;
+      else
+         Ecrire_Ad_IP (Sortie, Adresse_IP);
+         Put(Sortie, " ");
+         Put(Sortie, Int);
+         New_Line (Sortie);
+      end if;
+   end association_ad_des;
+
+
+
+   procedure identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA) is
+   begin
+      if Texte = "table" then
+         Afficher_Debug_routeur_simpe(Tab_routage);
+               
+      elsif Texte = "cache" then
+         Put("Commande non programmé: affichage Cache");
+               
+      elsif Texte = "stat" then
+         Put("Commande non programmé: Affichafe stat Cache");
+               
+      elsif Texte = "fin" then
+         raise End_Error;
+               
+      else 
+         -- Traiter erreur commande texte
+         Put ("Erreur à la ligne : ");
+         Put(Ligne);
+         raise Commande_Inconnu_Error;
+      end if;
+   end identifier_commande;
 
 end Fonctions_globales;
