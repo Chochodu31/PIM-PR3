@@ -5,6 +5,7 @@ with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
 with Fonctions_globales; use Fonctions_globales;
 use Fonctions_globales.LCA_routeur_simple;
 with Routeur_exceptions; use Routeur_exceptions;
+with ada.Integer_Text_IO; use ada.Integer_Text_IO;
 
 procedure Routage_simple is
 
@@ -27,32 +28,9 @@ begin
 	Gerer_commandes (Cache, Politique, Statistique, Table, Paquet, Resultat);
 
 
-   -- Agir sur la ligne de commande
-   -- Agir selon Statistique
-   if Statistique then
-      Put("Rien à afficher car pas encore de cache");
-   else
-      Null;
-   end if;
-
-   -- Agir selon Cache
-   if Cache = 0 then
-      Null;
-   else
-      Put("Pas pris en compte : ici on est à routage simple");
-   end if;
-
-   -- Agir selon Politique
-   if Politique in Tab_Politique then
-      Put("La politique n'est pas pris en charge car il n'y a pas de cache");
-   else
-      null;
-   end if;
-
-
    -- Créer la table de routage
    Initialiser (Tab_routage);
-   table_routage(To_String(Table), Tab_routage);
+   Table_routage(To_String(Table), Tab_routage);
 
 
    -- Mettre en place l'entrée et la sortie
@@ -71,22 +49,22 @@ begin
          -- Traiter le paquet à router
          Texte := Get_Line (Entree);
          Ligne := Integer (line(Entree));
-         Trim(Texte, both);
+         Trim (Texte, both);
 
          -- Identifier commande ou adresse IP
          IP_cmd := (To_String(Texte)(1) in '0' .. '9');
 
          if IP_cmd then
             -- Identifier adresse IP
-            Adresse_IP := id_ad_IP (To_String(Texte));
+            Adresse_IP := Id_ad_IP (To_String(Texte));
 
 
             -- Associer adresse IP et Interface
-            association_ad_des(Tab_Routage,  Sortie, Adresse_IP);
+            Association_ad_des(Tab_Routage,  Sortie, Adresse_IP);
          
          else
             -- Identifier commande
-            identifier_commande (To_String(Texte), Ligne, Tab_routage);
+            Identifier_commande (To_String(Texte), Ligne, Tab_routage);
 
          end if;
       end loop;
@@ -98,4 +76,29 @@ begin
    Close (Entree);
 	Close (Sortie);
    Detruire(Tab_routage);
+
+
+   -- Agir sur la ligne de commande
+   -- Agir selon Statistique
+   if Statistique then
+      New_Line;
+      Put("Rien à afficher car pas encore de cache");
+   else
+      Null;
+   end if;
+
+   -- Agir selon Cache
+   New_Line;
+   Put("Taille cache : ");
+   Put(Cache, 2);
+
+   -- Agir selon Politique
+   New_Line;
+   if Politique = FIFO then
+      Put("La politique choisi : FIFO");
+   elsif Politique = LRU then
+      Put("Politique choisi : LRU");
+   else
+      Put("Politique choisi : LFU");
+   end if;
 end Routage_simple;

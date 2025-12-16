@@ -35,12 +35,14 @@ package LCA is
 				and (not (Cle_Presente (Sda, Cle)'Old) or Taille (Sda) = Taille (Sda)'Old)
 				and (Cle_Presente (Sda, Cle)'Old or Taille (Sda) = Taille (Sda)'Old + 1);
 
+
 	-- Enregistrer une valeur associée à une Clé dans une Sda.
 	-- Si la clé est déjà présente dans la Sda, sa valeur est changée.
 	procedure Enregistrer_Iteratif (Sda : in out T_LCA ; Cle : in T_Cle ; Valeur : in T_Valeur) with
 		Post => Cle_Presente (Sda, Cle) and (La_Valeur (Sda, Cle) = Valeur)   -- valeur insérée
 				and (not (Cle_Presente (Sda, Cle)'Old) or Taille (Sda) = Taille (Sda)'Old)
 				and (Cle_Presente (Sda, Cle)'Old or Taille (Sda) = Taille (Sda)'Old + 1);
+
 
 	-- Enregistrer une valeur associée à une Clé dans une Sda.
 	-- Si la clé est déjà présente dans la Sda, sa valeur est changée.

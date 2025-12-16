@@ -156,7 +156,7 @@ package body LCA is
 	end Supprimer_Iteratif;
 
 
-        procedure Supprimer_Recursif (Sda : in out T_LCA ; Cle : in T_Cle) is
+   procedure Supprimer_Recursif (Sda : in out T_LCA ; Cle : in T_Cle) is
 		Curseur : T_LCA;
 	begin
 		if Sda = Null then
