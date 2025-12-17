@@ -263,7 +263,7 @@ package body Fonctions_globales is
    end Gerer_commandes;
 
 
-   procedure association_ad_des (Tab_Routage : in T_LCA; Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP) is
+   function association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String is
       Masque : T_Adresse_IP;
       Association : Integer;
       Valeur : T_Case;
@@ -285,16 +285,23 @@ package body Fonctions_globales is
             when Cle_Absente_Error => Null;
          end;
       end loop;
+
       if Association = 0 then
          raise Adresse_IP_Introuvable_Error;
       else
-         Ecrire_Ad_IP (Sortie, Adresse_IP);
-         Put (Sortie, " ");
-         Put (Sortie, To_String (Int));
-         New_Line (Sortie);
+         Null;
       end if;
+      return Int;
    end association_ad_des;
 
+
+   procedure Ecrire (Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP; Int : in String) is
+   begin
+      Ecrire_Ad_IP (Sortie, Adresse_IP);
+      Put (Sortie, " ");
+      Put (Sortie, Int);
+      New_Line (Sortie);
+   end Ecrire;
 
 
    procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA) is

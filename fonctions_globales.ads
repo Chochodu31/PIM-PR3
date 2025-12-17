@@ -64,8 +64,12 @@ package Fonctions_globales is
 
    -- Association de l'adresse IP et de Destination dans la table de routage.
    -- Exception : Adresse_IP_Introuvable_Error si il n'y à pas de Destination et de Masque qui correspondent à l'adresse IP
-   procedure Association_ad_des (Tab_Routage : in T_LCA; Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP);
+   function Association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String;
    
+   
+   -- Ecrire dans le fichier de Sortie l'adressse IP et l'interface associé
+   procedure Ecrire (Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP; Int : in String);
+
 
    -- Identifier la de commande écrite
    -- Exception : Commande_Inconnu_Error si la ligne de commande ne respecte pas les critères demandés

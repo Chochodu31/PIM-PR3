@@ -2,14 +2,14 @@ with Ada.Text_IO;		use Ada.Text_IO;
 with Ada.Strings; 		use Ada.Strings;
 with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
 with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
-with Fonctions_globales; use Fonctions_globales;
+with Fonctions_globales;   use Fonctions_globales;
 use Fonctions_globales.LCA_routeur_simple;
-with Routeur_exceptions; use Routeur_exceptions;
-with ada.Integer_Text_IO; use ada.Integer_Text_IO;
+with Routeur_exceptions;   use Routeur_exceptions;
+with ada.Integer_Text_IO;  use ada.Integer_Text_IO;
 
 procedure Routage_simple is
 
-	Cache : Integer;  -- Taille du cache
+	Cache_Taille : Integer;  -- Taille du cache
 	Politique: Tab_Politique;  -- Politique de traitement de cache
 	Statistique : Boolean;  -- Affichage des statistiques
 	Table : Unbounded_String;  -- Nom du fichier contenant les éléments de la table de routage
@@ -22,10 +22,11 @@ procedure Routage_simple is
    Ligne : Integer;  -- Numéro de ligne qu'on traite
    IP_cmd : Boolean; -- Distinction entre commande ou paquet à router
    Adresse_IP : T_Adresse_IP; -- Adresse_IP à router
+   Int : Unbounded_String;
 	
 begin
    -- Comprendre la ligne de commande
-	Gerer_commandes (Cache, Politique, Statistique, Table, Paquet, Resultat);
+	Gerer_commandes (Cache_Taille, Politique, Statistique, Table, Paquet, Resultat);
 
 
    -- Créer la table de routage
@@ -43,6 +44,7 @@ begin
          raise Fichier_Inconnu_Error;
    end;
 
+
    begin
       -- Traiter les paquets à router
       while not End_Of_File (Entree) loop
@@ -54,13 +56,14 @@ begin
          -- Identifier commande ou adresse IP
          IP_cmd := (To_String(Texte)(1) in '0' .. '9');
 
+
          if IP_cmd then
             -- Identifier adresse IP
             Adresse_IP := Id_ad_IP (To_String(Texte));
 
             -- Associer adresse IP et Interface
-            Association_ad_des(Tab_Routage,  Sortie, Adresse_IP);
-         
+            Int := Association_ad_des (Tab_Routage, Adresse_IP);
+            Ecrire (Sortie, Adresse_IP, To_String(Int));
          else
             -- Identifier commande
             Identifier_commande (To_String(Texte), Ligne, Tab_routage);
@@ -70,6 +73,7 @@ begin
    exception
       when End_Error => null;
    end;
+
 
    -- Fermer les fichiers
    Close (Entree);
@@ -89,7 +93,7 @@ begin
    -- Agir selon Cache
    New_Line;
    Put("Taille cache : ");
-   Put(Cache, 2);
+   Put(Cache_Taille, 2);
 
    -- Agir selon Politique
    New_Line;
