@@ -2,7 +2,6 @@ with Ada.Text_IO;		use Ada.Text_IO;
 with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
 with Fonctions_globales;   use Fonctions_globales;
 use Fonctions_globales.LCA_routeur_simple;
-with Routeur_exceptions;   use Routeur_exceptions;
 with ada.Integer_Text_IO;  use ada.Integer_Text_IO;
 
 procedure Routage_simple is
@@ -29,44 +28,10 @@ begin
 
    -- Mettre en place l'entrée et la sortie
 	Create (Sortie, Out_File, To_String (Resultat));
-   begin
-	   Open (Entree, In_File, To_String (Paquet));
-   exception
-      when Name_Error =>
-         Put("Erreur : " & To_String(Paquet) & " inconnu");
-         raise Fichier_Inconnu_Error;
-   end;
+   Ouvrir (To_String(Paquet), Entree);
 
-
-   begin
-      -- Traiter les paquets à router
-      Traiter_les_paquets (Entree, Sortie, Tab_routage);
-      --  while not End_Of_File (Entree) loop
-      --     -- Traiter le paquet à router
-      --     Texte := Get_Line (Entree);
-      --     Ligne := Integer (line(Entree));
-      --     Trim (Texte, both);
-
-      --     -- Identifier commande ou adresse IP
-      --     IP_cmd := (To_String(Texte)(1) in '0' .. '9');
-
-
-      --     if IP_cmd then
-      --        -- Identifier adresse IP
-      --        Adresse_IP := Id_ad_IP (To_String(Texte));
-
-      --        -- Associer adresse IP et Interface
-      --        Int := Association_ad_des (Tab_Routage, Adresse_IP);
-      --        Ecrire (Sortie, Adresse_IP, To_String(Int));
-      --     else
-      --        -- Identifier commande
-      --        Identifier_commande (To_String(Texte), Ligne, Tab_routage);
-
-      --     end if;
-      --  end loop;
-   exception
-      when End_Error => null;
-   end;
+   -- Traiter les paquets à router
+   Traiter_les_paquets (Entree, Sortie, Tab_routage);
 
 
    -- Fermer les fichiers

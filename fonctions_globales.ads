@@ -41,6 +41,7 @@ package Fonctions_globales is
       Afficher_Donnee => Afficher_Donnee_Case
    );
 
+
    -- Convertir une chaine en T_Adresse_IP
    -- Exception : Adresse_IP_Introuvable_Error si échec de transformation
    function Id_ad_IP (Texte : in String) return T_Adresse_IP;
@@ -49,7 +50,6 @@ package Fonctions_globales is
    -- Créer la table de routage à partir d'un fichier
    -- Exception : Fichier_Inconnu_Error si Table n'est pas un fichier ouvrable
    procedure Table_routage (Table : in String; Tab_routage : in out T_LCA);
-
 
 
    -- Analyser les arguments de la ligne de commande
@@ -63,6 +63,9 @@ package Fonctions_globales is
                               );
 
 
+   procedure Ouvrir(Paquet : in String; Entree : in out File_Type);
+
+   -- Traiter les paquets à router
    procedure Traiter_les_paquets (Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA);
 
 

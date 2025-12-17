@@ -264,6 +264,19 @@ package body Fonctions_globales is
       end loop;
    end Gerer_commandes;
 
+
+   procedure Ouvrir(Paquet : in String; Entree : in out File_Type) is
+   begin
+      begin
+	      Open (Entree, In_File, Paquet);
+      exception
+         when Name_Error =>
+            Put("Erreur : " & Paquet & " inconnu");
+            raise Fichier_Inconnu_Error;
+      end;
+   end Ouvrir;
+
+
    procedure Traiter_les_paquets(Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA) is
       Texte : Unbounded_String;
       Ligne : Integer;
@@ -272,29 +285,33 @@ package body Fonctions_globales is
       Int : Unbounded_String;
 
    begin
-      while not End_Of_File (Entree) loop
-         -- Traiter le paquet à router
-         Texte := To_Unbounded_String(Get_Line (Entree));
-         Ligne := Integer (line(Entree));
-         Trim (Texte, both);
+      begin 
+         while not End_Of_File (Entree) loop
+            -- Traiter le paquet à router
+            Texte := To_Unbounded_String(Get_Line (Entree));
+            Ligne := Integer (line(Entree));
+            Trim (Texte, both);
 
-         -- Identifier commande ou adresse IP
-         IP_cmd := (To_String(Texte)(1) in '0' .. '9');
+            -- Identifier commande ou adresse IP
+            IP_cmd := (To_String(Texte)(1) in '0' .. '9');
 
 
-         if IP_cmd then
-            -- Identifier adresse IP
-            Adresse_IP := Id_ad_IP (To_String(Texte));
+            if IP_cmd then
+               -- Identifier adresse IP
+               Adresse_IP := Id_ad_IP (To_String(Texte));
 
-            -- Associer adresse IP et Interface
-            Int := Association_ad_des (Tab_Routage, Adresse_IP);
-            Ecrire (Sortie, Adresse_IP, To_String(Int));
-         else
-            -- Identifier commande
-            Identifier_commande (To_String(Texte), Ligne, Tab_routage);
+               -- Associer adresse IP et Interface
+               Int := Association_ad_des (Tab_Routage, Adresse_IP);
+               Ecrire (Sortie, Adresse_IP, To_String(Int));
+            else
+               -- Identifier commande
+               Identifier_commande (To_String(Texte), Ligne, Tab_routage);
 
-         end if;
-      end loop;
+            end if;
+         end loop;
+      exception
+         when End_Error => null;
+      end;
    end Traiter_les_paquets;
 
 
