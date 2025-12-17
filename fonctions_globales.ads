@@ -59,14 +59,18 @@ package Fonctions_globales is
                               Statistique : out Boolean; 
                               Table : out Unbounded_String;
                               Paquet : out Unbounded_String;
-                              Resultat : out Unbounded_String );
+                              Resultat : out Unbounded_String
+                              );
+
+
+   procedure Traiter_les_paquets (Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA);
 
 
    -- Association de l'adresse IP et de Destination dans la table de routage.
    -- Exception : Adresse_IP_Introuvable_Error si il n'y à pas de Destination et de Masque qui correspondent à l'adresse IP
    function Association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String;
    
-   
+
    -- Ecrire dans le fichier de Sortie l'adressse IP et l'interface associé
    procedure Ecrire (Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP; Int : in String);
 

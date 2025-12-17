@@ -2,6 +2,8 @@ with Routeur_exceptions; use Routeur_exceptions;
 with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
 with Sda_Exceptions;		use Sda_Exceptions;
+with Ada.Strings; 		use Ada.Strings;
+
 
 package body Fonctions_globales is
 
@@ -261,6 +263,39 @@ package body Fonctions_globales is
          Nb_cmd := Nb_cmd + 1;
       end loop;
    end Gerer_commandes;
+
+   procedure Traiter_les_paquets(Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA) is
+      Texte : Unbounded_String;
+      Ligne : Integer;
+      IP_cmd : Boolean;
+      Adresse_IP : T_Adresse_IP;
+      Int : Unbounded_String;
+
+   begin
+      while not End_Of_File (Entree) loop
+         -- Traiter le paquet à router
+         Texte := To_Unbounded_String(Get_Line (Entree));
+         Ligne := Integer (line(Entree));
+         Trim (Texte, both);
+
+         -- Identifier commande ou adresse IP
+         IP_cmd := (To_String(Texte)(1) in '0' .. '9');
+
+
+         if IP_cmd then
+            -- Identifier adresse IP
+            Adresse_IP := Id_ad_IP (To_String(Texte));
+
+            -- Associer adresse IP et Interface
+            Int := Association_ad_des (Tab_Routage, Adresse_IP);
+            Ecrire (Sortie, Adresse_IP, To_String(Int));
+         else
+            -- Identifier commande
+            Identifier_commande (To_String(Texte), Ligne, Tab_routage);
+
+         end if;
+      end loop;
+   end Traiter_les_paquets;
 
 
    function association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String is

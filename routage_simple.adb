@@ -1,7 +1,5 @@
 with Ada.Text_IO;		use Ada.Text_IO;
-with Ada.Strings; 		use Ada.Strings;
 with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
-with Ada.Text_IO.Unbounded_IO;	use Ada.Text_IO.Unbounded_IO;
 with Fonctions_globales;   use Fonctions_globales;
 use Fonctions_globales.LCA_routeur_simple;
 with Routeur_exceptions;   use Routeur_exceptions;
@@ -18,11 +16,6 @@ procedure Routage_simple is
    Tab_routage : T_LCA; -- Table de routage
    Entree : File_Type;  -- Fichier d'entrée
 	Sortie : File_Type;  -- Fichier de sortie
-   Texte : Unbounded_String;  -- Paquet à router
-   Ligne : Integer;  -- Numéro de ligne qu'on traite
-   IP_cmd : Boolean; -- Distinction entre commande ou paquet à router
-   Adresse_IP : T_Adresse_IP; -- Adresse_IP à router
-   Int : Unbounded_String;
 	
 begin
    -- Comprendre la ligne de commande
@@ -47,29 +40,30 @@ begin
 
    begin
       -- Traiter les paquets à router
-      while not End_Of_File (Entree) loop
-         -- Traiter le paquet à router
-         Texte := Get_Line (Entree);
-         Ligne := Integer (line(Entree));
-         Trim (Texte, both);
+      Traiter_les_paquets (Entree, Sortie, Tab_routage);
+      --  while not End_Of_File (Entree) loop
+      --     -- Traiter le paquet à router
+      --     Texte := Get_Line (Entree);
+      --     Ligne := Integer (line(Entree));
+      --     Trim (Texte, both);
 
-         -- Identifier commande ou adresse IP
-         IP_cmd := (To_String(Texte)(1) in '0' .. '9');
+      --     -- Identifier commande ou adresse IP
+      --     IP_cmd := (To_String(Texte)(1) in '0' .. '9');
 
 
-         if IP_cmd then
-            -- Identifier adresse IP
-            Adresse_IP := Id_ad_IP (To_String(Texte));
+      --     if IP_cmd then
+      --        -- Identifier adresse IP
+      --        Adresse_IP := Id_ad_IP (To_String(Texte));
 
-            -- Associer adresse IP et Interface
-            Int := Association_ad_des (Tab_Routage, Adresse_IP);
-            Ecrire (Sortie, Adresse_IP, To_String(Int));
-         else
-            -- Identifier commande
-            Identifier_commande (To_String(Texte), Ligne, Tab_routage);
+      --        -- Associer adresse IP et Interface
+      --        Int := Association_ad_des (Tab_Routage, Adresse_IP);
+      --        Ecrire (Sortie, Adresse_IP, To_String(Int));
+      --     else
+      --        -- Identifier commande
+      --        Identifier_commande (To_String(Texte), Ligne, Tab_routage);
 
-         end if;
-      end loop;
+      --     end if;
+      --  end loop;
    exception
       when End_Error => null;
    end;
