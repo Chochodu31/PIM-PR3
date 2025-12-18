@@ -42,11 +42,6 @@ package Fonctions_globales is
    );
 
 
-   -- Convertir une chaine en T_Adresse_IP
-   -- Exception : Adresse_IP_Introuvable_Error si échec de transformation
-   function Id_ad_IP (Texte : in String) return T_Adresse_IP;
-
-
    -- Créer la table de routage à partir d'un fichier
    -- Exception : Fichier_Inconnu_Error si Table n'est pas un fichier ouvrable
    procedure Table_routage (Table : in String; Tab_routage : in out T_LCA);
@@ -63,23 +58,12 @@ package Fonctions_globales is
                               );
 
 
+   -- Ouvrir fichier
+   -- Exception : Fichier_Inconnu_Error si le fichier qu'on essaye d'ouvrir n'existe pas.
    procedure Ouvrir(Paquet : in String; Entree : in out File_Type);
+
 
    -- Traiter les paquets à router
    procedure Traiter_les_paquets (Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA);
-
-
-   -- Association de l'adresse IP et de Destination dans la table de routage.
-   -- Exception : Adresse_IP_Introuvable_Error si il n'y à pas de Destination et de Masque qui correspondent à l'adresse IP
-   function Association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String;
    
-
-   -- Ecrire dans le fichier de Sortie l'adressse IP et l'interface associé
-   procedure Ecrire (Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP; Int : in String);
-
-
-   -- Identifier la de commande écrite
-   -- Exception : Commande_Inconnu_Error si la ligne de commande ne respecte pas les critères demandés
-   procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA);
-
 end Fonctions_globales;

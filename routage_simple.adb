@@ -30,6 +30,7 @@ begin
 	Create (Sortie, Out_File, To_String (Resultat));
    Ouvrir (To_String(Paquet), Entree);
 
+
    -- Traiter les paquets à router
    Traiter_les_paquets (Entree, Sortie, Tab_routage);
 

@@ -58,6 +58,8 @@ package body Fonctions_globales is
    end Ecrire_Ad_IP;
 
 
+   -- Convertir une chaine en T_Adresse_IP
+   -- Exception : Adresse_IP_Introuvable_Error si échec de transformation
    function Id_ad_IP (Texte : in String) return T_Adresse_IP is
       indice_octet : Integer := 1;
       valeur_courante : Integer := 0;
@@ -121,8 +123,8 @@ package body Fonctions_globales is
          when Name_Error =>
             raise Fichier_Inconnu_Error;
       end;
-      while not End_Of_File (Entree) loop
 
+      while not End_Of_File (Entree) loop
          -- Comprendre la ligne
          Texte := To_Unbounded_String (Get_Line (Entree));
 
@@ -137,7 +139,7 @@ package body Fonctions_globales is
                null;
             elsif To_String(Texte)(Compteur)= ' ' and not Compteur_Espace then
                compteur_espace := True;
-               colonne := colonne +1;
+               colonne := colonne + 1;
             else 
                compteur_espace := False;
                Tab (colonne) := Tab (colonne) & To_String(Texte)(compteur);                      
@@ -277,44 +279,8 @@ package body Fonctions_globales is
    end Ouvrir;
 
 
-   procedure Traiter_les_paquets(Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA) is
-      Texte : Unbounded_String;
-      Ligne : Integer;
-      IP_cmd : Boolean;
-      Adresse_IP : T_Adresse_IP;
-      Int : Unbounded_String;
-
-   begin
-      begin 
-         while not End_Of_File (Entree) loop
-            -- Traiter le paquet à router
-            Texte := To_Unbounded_String(Get_Line (Entree));
-            Ligne := Integer (line(Entree));
-            Trim (Texte, both);
-
-            -- Identifier commande ou adresse IP
-            IP_cmd := (To_String(Texte)(1) in '0' .. '9');
-
-
-            if IP_cmd then
-               -- Identifier adresse IP
-               Adresse_IP := Id_ad_IP (To_String(Texte));
-
-               -- Associer adresse IP et Interface
-               Int := Association_ad_des (Tab_Routage, Adresse_IP);
-               Ecrire (Sortie, Adresse_IP, To_String(Int));
-            else
-               -- Identifier commande
-               Identifier_commande (To_String(Texte), Ligne, Tab_routage);
-
-            end if;
-         end loop;
-      exception
-         when End_Error => null;
-      end;
-   end Traiter_les_paquets;
-
-
+   -- Association de l'adresse IP et de Destination dans la table de routage.
+   -- Exception : Adresse_IP_Introuvable_Error si il n'y à pas de Destination et de Masque qui correspondent à l'adresse IP
    function association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String is
       Masque : T_Adresse_IP;
       Association : Integer;
@@ -347,6 +313,7 @@ package body Fonctions_globales is
    end association_ad_des;
 
 
+   -- Ecrire dans le fichier de Sortie l'adressse IP et l'interface associé
    procedure Ecrire (Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP; Int : in String) is
    begin
       Ecrire_Ad_IP (Sortie, Adresse_IP);
@@ -356,6 +323,8 @@ package body Fonctions_globales is
    end Ecrire;
 
 
+   -- Identifier la commande écrite
+   -- Exception : Commande_Inconnu_Error si la ligne de commande ne respecte pas les critères demandés
    procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA) is
    begin
       if Texte = "table" then
@@ -377,5 +346,45 @@ package body Fonctions_globales is
          raise Commande_Inconnu_Error;
       end if;
    end Identifier_commande;
+
+
+   procedure Traiter_les_paquets(Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA) is
+      Texte : Unbounded_String;
+      Ligne : Integer;
+      IP_cmd : Boolean;
+      Adresse_IP : T_Adresse_IP;
+      Int : Unbounded_String;
+
+   begin
+      begin 
+         while not End_Of_File (Entree) loop
+            
+            -- Initialiser traitement de ligne
+            Texte := To_Unbounded_String(Get_Line (Entree));
+            Ligne := Integer (line(Entree));
+            Trim (Texte, both);
+
+            -- Traiter selon commande ou Adresse IP
+            IP_cmd := (To_String(Texte)(1) in '0' .. '9');
+
+
+            if IP_cmd then
+               -- Identifier adresse IP
+               Adresse_IP := Id_ad_IP (To_String(Texte));
+
+               -- Associer adresse IP et Interface
+               Int := Association_ad_des (Tab_Routage, Adresse_IP);
+               Ecrire (Sortie, Adresse_IP, To_String(Int));
+            else
+               -- Identifier commande
+               Identifier_commande (To_String(Texte), Ligne, Tab_routage);
+
+            end if;
+         end loop;
+      exception
+         when End_Error => null;
+      end;
+   end Traiter_les_paquets;
+
 
 end Fonctions_globales;
