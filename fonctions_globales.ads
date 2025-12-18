@@ -60,7 +60,7 @@ package Fonctions_globales is
 
    -- Ouvrir fichier
    -- Exception : Fichier_Inconnu_Error si le fichier qu'on essaye d'ouvrir n'existe pas.
-   procedure Ouvrir(Paquet : in String; Entree : in out File_Type);
+   procedure Ouvrir (Paquet : in String; Entree : in out File_Type);
 
 
    -- Traiter les paquets à router
