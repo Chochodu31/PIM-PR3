@@ -102,8 +102,9 @@ package body Fonctions_globales is
    --  end id_ad_IP;
 
       
-   procedure Id_ad_IP(Texte : in String; adresse_IP : out T_Adresse_IP) is
+   function Id_ad_IP(Texte : in String) return T_Adresse_IP is
       type Tab_Octets is array (1..4) of T_Octet;
+      adresse_IP : T_Adresse_IP;
       Octets : Tab_Octets := (0, 0, 0, 0);
       indice_octet : Integer := 1;
       valeur_courante : Integer := 0;
@@ -143,7 +144,7 @@ package body Fonctions_globales is
                indice_octet := indice_octet + 1;
                valeur_courante := 0;
                -- Vérifier qu'il n'y a pas deux points consécutifs.
-               if i = Texte(1) or Texte(i-1) = '.' then
+               if i = 1 or Texte(i-1) = '.' then
                   raise Adresse_IP_Introuvable_Error;
                else
                   null;    
@@ -186,7 +187,7 @@ package body Fonctions_globales is
       for i in 1..4 loop
          adresse_IP := adresse_IP * UN_OCTET + T_Adresse_IP(octets(i));
       end loop;
-      
+      return adresse_IP;
    exception
       when others =>
          raise Adresse_IP_Introuvable_Error;
