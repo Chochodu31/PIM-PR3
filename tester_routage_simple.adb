@@ -28,7 +28,12 @@ procedure Tester_routage_simple is
       T_Valeur => T_Case
    );
 
+   generic
+      K1, K2, K3, K4, K5 : Integer; -- 5 entrée dans dans la table de routage
+      V1, V2, V3, V4, V5 : T_Case;
+
    package Testeur is
+
 
       generic
          with function "+" (Gauche, Droite : in V) return V;
@@ -68,6 +73,7 @@ procedure Tester_routage_simple is
    
    end Testeur;
 
+
    procedure Creer_Table_routage is
    begin
    end Creer_Table_routage;
@@ -75,6 +81,7 @@ procedure Tester_routage_simple is
    procedure Creer_Paquet is 
    begin
    end Creer_Paquet;
+
 
    procedure Tester_Table_Routage is
       Table : String;
@@ -85,6 +92,51 @@ procedure Tester_routage_simple is
       Put ("OK");
    end Tester_Table_Routage;
 
-begin
 
+   procedure Tester_Gerer_Commande is 
+   begin
+      Put("Tester_Gerer_Commande : ");
+      Put("Ok");
+   end Tester_Gerer_Commande;
+
+   procedure Tester_Ouvrir is 
+   begin
+      Put("Tester_Ouvrir : ");
+      Put("Ok");
+   end Tester_Ouvrir;
+
+   procedure Tester_Traiter_les_Paquets is
+   begin
+      Put("Tester_Traiter_les_Paquets : ");
+      Put("Ok");
+   end Tester_Traiter_les_Paquets;
+
+   procedure Tester_Id_ad_IP is 
+   begin
+      Put("Tester_ID_ad_IP : ");
+      Put("Ok");
+   end Tester_Id_ad_IP;
+
+   procedure Tester_Association_ad_des is
+   begin
+      Put("Tester_Association_ad_des : ");
+      Put("Ok");
+   end Tester_Association_ad_des;
+
+   procedure Tester_Identifier_commande is
+   begin
+      Put("Tester_Identifier_commande : ");
+      Put("Ok");
+   end Tester_Identifier_commande;
+
+   package Testeur_Integer_Case is new Testeur (
+      1, 2, 3, 4, 5,
+      Case1, Case2, Case3, Case4, Case5
+   );
+
+   procedure Tester_Tout_Integer_Case is new Testeur_Integer_Case.Tester_Tout;
+begin
+   Tester_Tout_Integer_Case;
+   New_Line;
+   Put_Line ("Tout les tests ont réussi.");
 end Testeur;

@@ -58,48 +58,139 @@ package body Fonctions_globales is
    end Ecrire_Ad_IP;
 
 
-   -- Convertir une chaine en T_Adresse_IP
-   -- Exception : Adresse_IP_Introuvable_Error si échec de transformation
-   function Id_ad_IP (Texte : in String) return T_Adresse_IP is
+   --  -- Convertir une chaine en T_Adresse_IP
+   --  -- Exception : Adresse_IP_Introuvable_Error si échec de transformation
+   --  function Id_ad_IP (Texte : in String) return T_Adresse_IP is
+   --     indice_octet : Integer := 1;
+   --     valeur_courante : Integer := 0;
+   --     c : Character;
+   --     type T_Tableau_Octets is array (1..4) of T_Octet;
+   --     octets : T_Tableau_Octets;
+   --     adresse_IP : T_Adresse_IP := 0;
+   --  begin
+   --     for i in 1..Length (To_Unbounded_String (Texte)) loop
+   --        c := Texte (i);
+   --        if c = '.' then
+   --           if indice_octet > 3 then
+   --              raise Adresse_IP_Introuvable_Error;
+   --           end if;   
+   --           if valeur_courante > 255 then
+   --              raise Adresse_IP_Introuvable_Error;
+   --           end if;
+   --           octets (indice_octet) := T_Octet (valeur_courante);
+   --           indice_octet := indice_octet + 1;
+   --           valeur_courante := 0;         
+   --        elsif c in '0'..'9' then
+   --           valeur_courante := valeur_courante * 10  + Character'Pos (C) - Character'Pos ('0');
+   --        else
+   --           raise Adresse_IP_Introuvable_Error;
+   --        end if;
+   --     end loop;
+   --     octets(4) := T_Octet(valeur_courante);
+
+   --     if indice_octet /= 4 then
+   --        raise Adresse_IP_Introuvable_Error;
+   --     end if;
+   --     if valeur_courante > 255 then
+   --        raise Adresse_IP_Introuvable_Error;
+   --     end if;
+
+   --     for i in 1..4 loop
+   --        adresse_IP := adresse_IP * UN_OCTET + T_Adresse_IP (octets (i));
+   --     end loop;
+   --     return adresse_IP;
+   --  end id_ad_IP;
+
+      
+   procedure Id_ad_IP(Texte : in String; adresse_IP : out T_Adresse_IP) is
+      type Tab_Octets is array (1..4) of T_Octet;
+      Octets : Tab_Octets := (0, 0, 0, 0);
       indice_octet : Integer := 1;
       valeur_courante : Integer := 0;
-      c : Character;
-      type T_Tableau_Octets is array (1..4) of T_Octet;
-      octets : T_Tableau_Octets;
-      adresse_IP : T_Adresse_IP := 0;
+      caractere : Character;
+      
+      -- Convertir un character a un entier. 
+      function valeur_numerique(c : Character) return Integer is
+      begin
+         return Character'Pos(c) - Character'Pos('0');
+      end valeur_numerique;
+      
    begin
-      for i in 1..Length (To_Unbounded_String (Texte)) loop
-         c := Texte (i);
-         if c = '.' then
-            if indice_octet > 3 then
+      -- Etape 1: Decomposer adresse IP.
+
+      -- Vérifier que la chaîne n'est pas vide.
+      if Texte'Length = 0 then
+         raise Adresse_IP_Introuvable_Error;
+      end if;
+      -- Parcourir la chaine character par character.
+      for i in 1..Texte'Length loop
+         caractere := Texte(i);
+            if caractere = '.' then
+               -- Vérifier qu'on n'a pas déjà 4 octets.
+               if indice_octet > 3 then
+                  raise Adresse_IP_Introuvable_Error; 
+               else 
+                  null;   
+               end if;
+               -- Vérifier que l'octet est dans la plage valide.
+               if valeur_courante < 0 or valeur_courante > 255 then
+                  raise Adresse_IP_Introuvable_Error;
+               else
+                  null;   
+               end if; 
+               -- Stocker la valeur courante puis la reinisialiser. 
+               octets(indice_octet) := T_Octet(valeur_courante);
+               indice_octet := indice_octet + 1;
+               valeur_courante := 0;
+               -- Vérifier qu'il n'y a pas deux points consécutifs.
+               if i = Texte(1) or Texte(i-1) = '.' then
+                  raise Adresse_IP_Introuvable_Error;
+               else
+                  null;    
+               end if;
+               
+            elsif caractere in '0'..'9' then
+               -- Ajouter le chiffre à la valeur courante.
+               valeur_courante := valeur_courante * 10 + valeur_numerique(caractere);
+               -- Vérifier immédiatement s'il y'a depassemant.
+               if valeur_courante > 255 then
+                  raise Adresse_IP_Introuvable_Error;
+               end if;
+               
+            else
+               -- Pour un caractère invalide
                raise Adresse_IP_Introuvable_Error;
-            end if;   
-            if valeur_courante > 255 then
-               raise Adresse_IP_Introuvable_Error;
-            end if;
-            octets (indice_octet) := T_Octet (valeur_courante);
-            indice_octet := indice_octet + 1;
-            valeur_courante := 0;         
-         elsif c in '0'..'9' then
-            valeur_courante := valeur_courante * 10  + Character'Pos (C) - Character'Pos ('0');
-         else
-            raise Adresse_IP_Introuvable_Error;
          end if;
       end loop;
+      
+      -- Après la boucle, vérifier qu'on a exactement 4 octets
+      if indice_octet /= 4 then
+         raise Adresse_IP_Introuvable_Error;  -- Pas assez de points
+      end if;
+      
+      -- Vérifier le dernier octet
+      if valeur_courante < 0 or valeur_courante > 255 then
+         raise Adresse_IP_Introuvable_Error;
+      end if;
+      
+      -- Stocker le dernier octet
       octets(4) := T_Octet(valeur_courante);
 
-      if indice_octet /= 4 then
+      -- Vérifier qu'il n'y a pas de point à la fin
+      if Texte(Texte'Last) = '.' then
          raise Adresse_IP_Introuvable_Error;
       end if;
-      if valeur_courante > 255 then
-         raise Adresse_IP_Introuvable_Error;
-      end if;
-
+      
+      -- Etape 2: construire l'adresse IP à partir des octets.
+      adresse_IP := 0;
       for i in 1..4 loop
-         adresse_IP := adresse_IP * UN_OCTET + T_Adresse_IP (octets (i));
+         adresse_IP := adresse_IP * UN_OCTET + T_Adresse_IP(octets(i));
       end loop;
-      return adresse_IP;
-   end id_ad_IP;
+      
+   exception
+      when others =>
+         raise Adresse_IP_Introuvable_Error;
+   end Id_ad_IP;
 
 
    procedure Table_routage (Table: in String; Tab_routage : in out T_LCA) is
