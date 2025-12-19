@@ -52,7 +52,6 @@ procedure Tester_routage_simple is
       procedure Tester_Association_ad_des;
 
       procedure Tester_Identifier_commande;
-
    end Testeur;
 
    package body Testeur is
@@ -71,63 +70,63 @@ procedure Tester_routage_simple is
          Put_Line ("Tests : OK.");
       end Tester_Tout;
    
+
+
+      procedure Creer_Table_routage is
+      begin
+      end Creer_Table_routage;
+
+      procedure Creer_Paquet is 
+      begin
+      end Creer_Paquet;
+
+
+      procedure Tester_Table_Routage is
+         Table : String;
+         Tab_routage : T_LCA;
+      begin
+         Put("Tester_Table_Routage : ");
+         Table_routage (Table, Tab_routage);
+         Put ("OK");
+      end Tester_Table_Routage;
+
+
+      procedure Tester_Gerer_Commande is 
+      begin
+         Put("Tester_Gerer_Commande : ");
+         Put("Ok");
+      end Tester_Gerer_Commande;
+
+      procedure Tester_Ouvrir is 
+      begin
+         Put("Tester_Ouvrir : ");
+         Put("Ok");
+      end Tester_Ouvrir;
+
+      procedure Tester_Traiter_les_Paquets is
+      begin
+         Put("Tester_Traiter_les_Paquets : ");
+         Put("Ok");
+      end Tester_Traiter_les_Paquets;
+
+      procedure Tester_Id_ad_IP is 
+      begin
+         Put("Tester_ID_ad_IP : ");
+         Put("Ok");
+      end Tester_Id_ad_IP;
+
+      procedure Tester_Association_ad_des is
+      begin
+         Put("Tester_Association_ad_des : ");
+         Put("Ok");
+      end Tester_Association_ad_des;
+
+      procedure Tester_Identifier_commande is
+      begin
+         Put("Tester_Identifier_commande : ");
+         Put("Ok");
+      end Tester_Identifier_commande;
    end Testeur;
-
-
-   procedure Creer_Table_routage is
-   begin
-   end Creer_Table_routage;
-
-   procedure Creer_Paquet is 
-   begin
-   end Creer_Paquet;
-
-
-   procedure Tester_Table_Routage is
-      Table : String;
-      Tab_routage : T_LCA;
-   begin
-      Put("Tester_Table_Routage : ");
-      Table_routage (Table, Tab_routage);
-      Put ("OK");
-   end Tester_Table_Routage;
-
-
-   procedure Tester_Gerer_Commande is 
-   begin
-      Put("Tester_Gerer_Commande : ");
-      Put("Ok");
-   end Tester_Gerer_Commande;
-
-   procedure Tester_Ouvrir is 
-   begin
-      Put("Tester_Ouvrir : ");
-      Put("Ok");
-   end Tester_Ouvrir;
-
-   procedure Tester_Traiter_les_Paquets is
-   begin
-      Put("Tester_Traiter_les_Paquets : ");
-      Put("Ok");
-   end Tester_Traiter_les_Paquets;
-
-   procedure Tester_Id_ad_IP is 
-   begin
-      Put("Tester_ID_ad_IP : ");
-      Put("Ok");
-   end Tester_Id_ad_IP;
-
-   procedure Tester_Association_ad_des is
-   begin
-      Put("Tester_Association_ad_des : ");
-      Put("Ok");
-   end Tester_Association_ad_des;
-
-   procedure Tester_Identifier_commande is
-   begin
-      Put("Tester_Identifier_commande : ");
-      Put("Ok");
-   end Tester_Identifier_commande;
 
    package Testeur_Integer_Case is new Testeur (
       1, 2, 3, 4, 5,
