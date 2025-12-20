@@ -61,7 +61,6 @@ procedure Tester_routage_simple is
       begin
          Tester_Table_Routage;
          Tester_Gerer_Commande;
-         Tester_Ouvrir;
          Tester_Traiter_les_Paquets;
          Tester_Id_ad_IP;
          Tester_Association_ad_des;
@@ -97,11 +96,6 @@ procedure Tester_routage_simple is
          Put("Ok");
       end Tester_Gerer_Commande;
 
-      procedure Tester_Ouvrir is 
-      begin
-         Put("Tester_Ouvrir : ");
-         Put("Ok");
-      end Tester_Ouvrir;
 
       procedure Tester_Traiter_les_Paquets is
       begin
