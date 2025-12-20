@@ -149,11 +149,9 @@ procedure Tester_Fonctions_Globales is
          pragma Assert(Resultat = Eth0);
          
          -- Test 5: Adresse sans correspondance (doit lever une exception)
-         -- Note: Dans notre configuration, toutes les adresses correspondent
          -- à la route par défaut, donc ce test est modifié
          begin
             Resultat := Association_ad_des(Table, Id_ad_IP("192.168.1.1"));
-            -- Avec la route par défaut, cela devrait fonctionner
             pragma Assert(Resultat = Eth0);
          exception
             when Adresse_IP_Introuvable_Error =>
@@ -184,16 +182,15 @@ procedure Tester_Fonctions_Globales is
          pragma Assert(not End_Of_File(Fichier));
          Close(Fichier);
          
-         -- Tester l'ouverture d'un fichier inexistant (doit lever une exception)
+         -- Tester l'ouverture d'un fichier inexistant 
          begin
             Ouvrir("fichier_inexistant.txt", Fichier);
-            pragma Assert(False); -- Ne devrait pas arriver ici
+            pragma Assert(False); 
          exception
             when Fichier_Inconnu_Error =>
-               null; -- Comportement attendu
+               null; 
          end;
          
-         -- Nettoyer
          Delete(Fichier);
          
          Put_Line("OK");
@@ -224,8 +221,7 @@ procedure Tester_Fonctions_Globales is
          -- Vérifier que la table a la bonne taille
          pragma Assert(Taille(Table) = 3);
          
-         -- Vérifier le contenu (approximatif)
-         -- On vérifie juste qu'on peut accéder aux éléments
+         -- Vérifierqu'on peut accéder aux éléments
          declare
             Valeur : T_Case;
          begin
@@ -249,7 +245,7 @@ procedure Tester_Fonctions_Globales is
             pragma Assert(False);
          exception
             when Fichier_Inconnu_Error =>
-               null; -- Comportement attendu
+               null; 
          end;
          
          Put_Line("OK");
@@ -268,11 +264,9 @@ procedure Tester_Fonctions_Globales is
          Enregistrer(Table, 1, V1);
          
          -- Tester les commandes valides
-         -- Note: ces commandes vont juste afficher à l'écran
-         -- Nous vérifions juste qu'elles ne lèvent pas d'exception
          begin
             Identifier_commande("table", 1, Table);
-            null; -- Pas d'exception, c'est bon
+            null; 
          exception
             when others =>
                pragma Assert(False);
@@ -280,11 +274,10 @@ procedure Tester_Fonctions_Globales is
          
          begin
             Identifier_commande("fin", 2, Table);
-            -- "fin" lève End_Error, c'est le comportement attendu
-            pragma Assert(False); -- Ne devrait pas arriver ici
+            pragma Assert(False); 
          exception
             when End_Error =>
-               null; -- Comportement attendu pour "fin"
+               null; 
          end;
          
          -- Tester une commande invalide
@@ -293,7 +286,7 @@ procedure Tester_Fonctions_Globales is
             pragma Assert(False);
          exception
             when Commande_Inconnu_Error =>
-               null; -- Comportement attendu
+               null; 
          end;
          
          Detruire(Table);
@@ -319,7 +312,7 @@ procedure Tester_Fonctions_Globales is
          Put_Line(Entree, "147.127.18.80");
          Put_Line(Entree, "212.212.212.212");
          Put_Line(Entree, "fin");
-         Put_Line(Entree, "147.127.19.1"); -- Cette ligne ne sera pas traitée à cause du "fin"
+         Put_Line(Entree, "147.127.19.1"); 
          Close(Entree);
          
          -- Créer une table de routage de test
@@ -388,14 +381,10 @@ begin
    Testeur_Instance.Tester_Tout;
    
    New_Line;
-   Put_Line("=========================================");
    Put_Line("Tous les tests ont réussi !");
-   Put_Line("=========================================");
    
 exception
    when others =>
-      Put_Line("=========================================");
       Put_Line("Certains tests ont échoué !");
-      Put_Line("=========================================");
       raise;
 end Tester_Fonctions_Globales;
