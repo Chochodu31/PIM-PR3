@@ -7,7 +7,7 @@ with Sda_Exceptions;        use Sda_Exceptions;
 with Routeur_exceptions;    use Routeur_exceptions;
 with Ada.Integer_Text_IO;   use Ada.Integer_Text_IO;
 
-procedure Tester_Fonctions_Globales is
+procedure tester_fonctions_globales is
 
    -- Valeurs de test pour les adresses IP
    IP1 : constant T_Adresse_IP := Id_ad_IP("192.168.1.1");
@@ -387,4 +387,4 @@ exception
    when others =>
       Put_Line("Certains tests ont échoué !");
       raise;
-end Tester_Fonctions_Globales;
+end tester_fonctions_globales;
