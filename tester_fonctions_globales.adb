@@ -1,3 +1,4 @@
+-- fichier : tester_fonctions_globales.adb
 with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Fonctions_globales;    use Fonctions_globales;
@@ -6,17 +7,21 @@ with Sda_Exceptions;        use Sda_Exceptions;
 with Routeur_exceptions;    use Routeur_exceptions;
 with Ada.Integer_Text_IO;   use Ada.Integer_Text_IO;
 
-procedure tester_fonctions_globales is
+procedure Tester_Fonctions_Globales is
 
+   -- Valeurs de test pour les adresses IP
    IP1 : constant T_Adresse_IP := Id_ad_IP("192.168.1.1");
    IP2 : constant T_Adresse_IP := Id_ad_IP("10.0.0.1");
    IP3 : constant T_Adresse_IP := Id_ad_IP("172.16.0.1");
    IP4 : constant T_Adresse_IP := Id_ad_IP("147.127.18.80");
    IP5 : constant T_Adresse_IP := Id_ad_IP("212.212.212.212");
+
+   -- Valeurs de test pour les interfaces
    Eth0 : constant Unbounded_String := To_Unbounded_String("eth0");
    Eth1 : constant Unbounded_String := To_Unbounded_String("eth1");
    Eth2 : constant Unbounded_String := To_Unbounded_String("eth2");
 
+   -- Cases de test
    Case1 : constant T_Case := 
       (Destination => Id_ad_IP("147.127.16.0"), 
        Masque => Id_ad_IP("255.255.240.0"), 
@@ -42,6 +47,7 @@ procedure tester_fonctions_globales is
        Masque => Id_ad_IP("0.0.0.0"), 
        Int => Eth0);
 
+   -- Package de test générique
    generic
       K1, K2, K3, K4, K5 : Integer;
       V1, V2, V3, V4, V5 : T_Case;
@@ -76,13 +82,13 @@ procedure tester_fonctions_globales is
          Adresse := Id_ad_IP("255.255.255.255");
          pragma Assert(Adresse = 16#FFFFFFFF#);
          
-         -- Test d'adresses invalides 
+         -- Test d'adresses invalides (doivent lever une exception)
          begin
             Adresse := Id_ad_IP("256.0.0.1");
-            pragma Assert(False); 
+            pragma Assert(False); -- Ne devrait pas arriver ici
          exception
             when Adresse_IP_Introuvable_Error =>
-               null; 
+               null; -- Comportement attendu
          end;
          
          begin
@@ -122,24 +128,32 @@ procedure tester_fonctions_globales is
          Enregistrer(Table, 4, V4); -- 212.0.0.0/8 -> eth0
          Enregistrer(Table, 5, V5); -- 0.0.0.0/0 -> eth0 (route par défaut)
          
+         -- Test 1: Adresse qui correspond à une route spécifique
          -- 147.127.18.80 devrait correspondre à V2 (masque plus long)
          Resultat := Association_ad_des(Table, Id_ad_IP("147.127.18.80"));
          pragma Assert(Resultat = Eth1);
          
+         -- Test 2: Adresse qui correspond à une route moins spécifique
          -- 147.127.19.1 devrait correspondre à V1 (147.127.16.0/20)
          Resultat := Association_ad_des(Table, Id_ad_IP("147.127.19.1"));
          pragma Assert(Resultat = Eth0);
          
+         -- Test 3: Adresse qui correspond à la route par défaut
          -- 8.8.8.8 devrait correspondre à V5
          Resultat := Association_ad_des(Table, Id_ad_IP("8.8.8.8"));
          pragma Assert(Resultat = Eth0);
          
+         -- Test 4: Adresse qui correspond à une route de longueur moyenne
          -- 212.212.212.212 devrait correspondre à V4 (212.0.0.0/8)
          Resultat := Association_ad_des(Table, Id_ad_IP("212.212.212.212"));
          pragma Assert(Resultat = Eth0);
-      
+         
+         -- Test 5: Adresse sans correspondance (doit lever une exception)
+         -- Note: Dans notre configuration, toutes les adresses correspondent
+         -- à la route par défaut, donc ce test est modifié
          begin
             Resultat := Association_ad_des(Table, Id_ad_IP("192.168.1.1"));
+            -- Avec la route par défaut, cela devrait fonctionner
             pragma Assert(Resultat = Eth0);
          exception
             when Adresse_IP_Introuvable_Error =>
@@ -170,15 +184,18 @@ procedure tester_fonctions_globales is
          pragma Assert(not End_Of_File(Fichier));
          Close(Fichier);
          
-         -- Tester l'ouverture d'un fichier inexistant(doit lever une exception)
+         -- Tester l'ouverture d'un fichier inexistant (doit lever une exception)
          begin
             Ouvrir("fichier_inexistant.txt", Fichier);
-            pragma Assert(False); 
+            pragma Assert(False); -- Ne devrait pas arriver ici
          exception
             when Fichier_Inconnu_Error =>
-               null; 
+               null; -- Comportement attendu
          end;
+         
+         -- Nettoyer
          Delete(Fichier);
+         
          Put_Line("OK");
       exception
          when others =>
@@ -207,7 +224,8 @@ procedure tester_fonctions_globales is
          -- Vérifier que la table a la bonne taille
          pragma Assert(Taille(Table) = 3);
          
-         -- vérifier qu'on peut accéder aux éléments
+         -- Vérifier le contenu (approximatif)
+         -- On vérifie juste qu'on peut accéder aux éléments
          declare
             Valeur : T_Case;
          begin
@@ -231,7 +249,7 @@ procedure tester_fonctions_globales is
             pragma Assert(False);
          exception
             when Fichier_Inconnu_Error =>
-               null; 
+               null; -- Comportement attendu
          end;
          
          Put_Line("OK");
@@ -250,9 +268,11 @@ procedure tester_fonctions_globales is
          Enregistrer(Table, 1, V1);
          
          -- Tester les commandes valides
+         -- Note: ces commandes vont juste afficher à l'écran
+         -- Nous vérifions juste qu'elles ne lèvent pas d'exception
          begin
             Identifier_commande("table", 1, Table);
-            null; 
+            null; -- Pas d'exception, c'est bon
          exception
             when others =>
                pragma Assert(False);
@@ -260,18 +280,20 @@ procedure tester_fonctions_globales is
          
          begin
             Identifier_commande("fin", 2, Table);
-            pragma Assert(False); 
+            -- "fin" lève End_Error, c'est le comportement attendu
+            pragma Assert(False); -- Ne devrait pas arriver ici
          exception
             when End_Error =>
-               null; 
+               null; -- Comportement attendu pour "fin"
          end;
-
+         
+         -- Tester une commande invalide
          begin
             Identifier_commande("commande_invalide", 3, Table);
             pragma Assert(False);
          exception
             when Commande_Inconnu_Error =>
-               null; 
+               null; -- Comportement attendu
          end;
          
          Detruire(Table);
@@ -360,16 +382,20 @@ procedure tester_fonctions_globales is
    );
    
 begin
-   Put_Line("Début des tests des fonctions globales");
+   Put_Line("Début des tests des fonctions globales...");
    New_Line;
    
    Testeur_Instance.Tester_Tout;
    
    New_Line;
+   Put_Line("=========================================");
    Put_Line("Tous les tests ont réussi !");
+   Put_Line("=========================================");
    
 exception
    when others =>
+      Put_Line("=========================================");
       Put_Line("Certains tests ont échoué !");
+      Put_Line("=========================================");
       raise;
-end tester_fonctions_globales;
+end Tester_Fonctions_Globales;
