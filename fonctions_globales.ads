@@ -66,4 +66,10 @@ package Fonctions_globales is
    -- Traiter les paquets à router
    procedure Traiter_les_paquets (Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA);
    
+   function Id_ad_IP (Texte : in String) return T_Adresse_IP;
+   
+   function Association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String;
+   
+   procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA);
+
 end Fonctions_globales;
