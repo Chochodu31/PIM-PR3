@@ -3,9 +3,10 @@ with Ada.Text_IO;           use Ada.Text_IO;
 with Ada.Strings.Unbounded; use Ada.Strings.Unbounded;
 with Fonctions_globales;    use Fonctions_globales;
 use Fonctions_globales.LCA_routeur_simple;
-with Sda_Exceptions;        use Sda_Exceptions;
+--  with Sda_Exceptions;        use Sda_Exceptions;
 with Routeur_exceptions;    use Routeur_exceptions;
-with Ada.Integer_Text_IO;   use Ada.Integer_Text_IO;
+--  with Ada.Integer_Text_IO;   use Ada.Integer_Text_IO;
+with Ada.Directories;   use Ada.Directories;
 
 procedure tester_fonctions_globales is
 
@@ -114,6 +115,7 @@ procedure tester_fonctions_globales is
             raise;
       end Tester_Id_ad_IP;
       
+
       procedure Tester_Association_ad_des is
          Table : T_LCA;
          Resultat : Unbounded_String;
@@ -166,6 +168,7 @@ procedure tester_fonctions_globales is
             raise;
       end Tester_Association_ad_des;
       
+
       procedure Tester_Ouvrir is
          Fichier : File_Type;
          Nom_Fichier : constant String := "test_fichier.txt";
@@ -191,7 +194,7 @@ procedure tester_fonctions_globales is
                null; 
          end;
          
-         Delete(Fichier);
+         Delete_File (Nom_Fichier);
          
          Put_Line("OK");
       exception
@@ -200,6 +203,8 @@ procedure tester_fonctions_globales is
             raise;
       end Tester_Ouvrir;
       
+
+
       procedure Tester_Table_routage is
          Table : T_LCA;
          Nom_Fichier : constant String := "test_table_routage.txt";
@@ -236,8 +241,8 @@ procedure tester_fonctions_globales is
          end;
          
          Detruire(Table);
-         Delete(Fichier);
-         
+         Delete_File (Nom_Fichier);
+
          -- Tester avec un fichier inexistant
          begin
             Initialiser(Table);
@@ -247,7 +252,7 @@ procedure tester_fonctions_globales is
             when Fichier_Inconnu_Error =>
                null; 
          end;
-         
+
          Put_Line("OK");
       exception
          when others =>
@@ -255,6 +260,8 @@ procedure tester_fonctions_globales is
             raise;
       end Tester_Table_routage;
       
+
+
       procedure Tester_Identifier_commande is
          Table : T_LCA;
       begin
@@ -266,7 +273,6 @@ procedure tester_fonctions_globales is
          -- Tester les commandes valides
          begin
             Identifier_commande("table", 1, Table);
-            null; 
          exception
             when others =>
                pragma Assert(False);
@@ -297,6 +303,8 @@ procedure tester_fonctions_globales is
             raise;
       end Tester_Identifier_commande;
       
+
+
       procedure Tester_Traiter_les_paquets is
          Table : T_LCA;
          Entree : File_Type;
@@ -338,8 +346,8 @@ procedure tester_fonctions_globales is
          
          -- Nettoyer
          Detruire(Table);
-         Delete(Entree);
-         Delete(Sortie);
+         Delete_File (Nom_Entree);
+         Delete_File (Nom_Sortie);
          
          Put_Line("OK");
       exception
