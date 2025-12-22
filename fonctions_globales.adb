@@ -9,7 +9,6 @@ package body Fonctions_globales is
 
    type T_Octet is mod 2 ** 8;
 
-   UN_OCTET: constant T_Adresse_IP := 2 ** 8;
    
    
    -- Afficher l'adresse IP.
@@ -59,49 +58,7 @@ package body Fonctions_globales is
 
 
    --  -- Convertir une chaine en T_Adresse_IP
-   --  -- Exception : Adresse_IP_Introuvable_Error si échec de transformation
-   --  function Id_ad_IP (Texte : in String) return T_Adresse_IP is
-   --     indice_octet : Integer := 1;
-   --     valeur_courante : Integer := 0;
-   --     c : Character;
-   --     type T_Tableau_Octets is array (1..4) of T_Octet;
-   --     octets : T_Tableau_Octets;
-   --     adresse_IP : T_Adresse_IP := 0;
-   --  begin
-   --     for i in 1..Length (To_Unbounded_String (Texte)) loop
-   --        c := Texte (i);
-   --        if c = '.' then
-   --           if indice_octet > 3 then
-   --              raise Adresse_IP_Introuvable_Error;
-   --           end if;   
-   --           if valeur_courante > 255 then
-   --              raise Adresse_IP_Introuvable_Error;
-   --           end if;
-   --           octets (indice_octet) := T_Octet (valeur_courante);
-   --           indice_octet := indice_octet + 1;
-   --           valeur_courante := 0;         
-   --        elsif c in '0'..'9' then
-   --           valeur_courante := valeur_courante * 10  + Character'Pos (C) - Character'Pos ('0');
-   --        else
-   --           raise Adresse_IP_Introuvable_Error;
-   --        end if;
-   --     end loop;
-   --     octets(4) := T_Octet(valeur_courante);
-
-   --     if indice_octet /= 4 then
-   --        raise Adresse_IP_Introuvable_Error;
-   --     end if;
-   --     if valeur_courante > 255 then
-   --        raise Adresse_IP_Introuvable_Error;
-   --     end if;
-
-   --     for i in 1..4 loop
-   --        adresse_IP := adresse_IP * UN_OCTET + T_Adresse_IP (octets (i));
-   --     end loop;
-   --     return adresse_IP;
-   --  end id_ad_IP;
-
-      
+   --  -- Exception : Adresse_IP_Introuvable_Error si échec de transformation   
    function Id_ad_IP(Texte : in String) return T_Adresse_IP is
       type Tab_Octets is array (1..4) of T_Octet;
       adresse_IP : T_Adresse_IP;
