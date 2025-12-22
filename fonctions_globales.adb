@@ -322,6 +322,7 @@ package body Fonctions_globales is
 	      Open (Entree, In_File, Paquet);
       exception
          when Name_Error =>
+            Put ("Erreur : " & Paquet & " inconnu");
             raise Fichier_Inconnu_Error;
       end;
    end Ouvrir;

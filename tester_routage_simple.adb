@@ -221,6 +221,7 @@ procedure tester_routage_simple is
       procedure Tester_Ouvrir is
          Fichier : File_Type;
          Nom_Fichier : constant String := "test_fichier.txt";
+         Dummy : File_Type;
       begin
          Put("Tester_Ouvrir : ");
          
@@ -234,6 +235,8 @@ procedure tester_routage_simple is
          pragma Assert(not End_Of_File(Fichier));
          Close(Fichier);
          
+         Create (Dummy, Out_File, "temp_output.txt");
+         Set_Output (Dummy);
          -- Tester l'ouverture d'un fichier inexistant 
          begin
             Ouvrir("fichier_inexistant.txt", Fichier);
@@ -242,8 +245,12 @@ procedure tester_routage_simple is
             when Fichier_Inconnu_Error =>
                null; 
          end;
+
          
          Delete_File (Nom_Fichier);
+         Set_Output (Standard_Output);
+         Close (Dummy);
+         Delete_File ("temp_output.txt");
          
          Put_Line("OK");
       exception
