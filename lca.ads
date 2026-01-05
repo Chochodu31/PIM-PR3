@@ -96,6 +96,7 @@ package LCA is
 		with procedure Afficher_Donnee (Valeur : in T_Valeur);
 	procedure Afficher_Debug (Sda : in T_LCA);
 
+-- hello
 
 private
 
