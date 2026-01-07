@@ -157,7 +157,6 @@ package body Fonctions_globales is
       Compteur_Espace : Boolean;
       Colonne : Integer;
       Texte: Unbounded_String;
-      Enregistrement : T_Case;
       Destination : T_Adresse_IP;
       Masque : T_Adresse_IP;
       Tab : T_Tab;
@@ -199,11 +198,7 @@ package body Fonctions_globales is
          Masque := Id_ad_IP (To_String (Tab(2)));
          Destination := Id_ad_IP(To_String(Tab(1)));
          Int := Tab(3);
-         Enregistrement.Masque := Masque;
-         Enregistrement.Destination:= Destination;
-         Enregistrement.Int := Int;
-         Taille_Var := Taille (Tab_routage);
-         Enregistrer (tab_routage, Taille_Var + 1, Enregistrement);
+         Enregistrer_routage (tab_routage, 0, Destination, Masque, Int);
       end loop;
       
       Close (Entree);

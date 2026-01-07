@@ -1,6 +1,7 @@
 with Fonctions_globales;
 generic
    type T_interface is private;
+   type T_Adresse_IP is private;
 
 package LISTES is
    type T_Liste is limited private;
@@ -20,7 +21,7 @@ package LISTES is
 
 
    -- Enregistrer une valeur dans la liste
-   procedure Enregistrer(liste : in out T_Liste; Frequence : Integer; Destination : T_Adresse_IP; Masque : T_Adresse_IP; Int : T_interface);
+   procedure Enregistrer_routage(liste : in out T_Liste; Frequence : Integer; Destination : T_Adresse_IP; Masque : T_Adresse_IP; Int : T_interface);
 
 
 private
@@ -32,7 +33,7 @@ private
       Suivant : T_Liste;
       Frequence : Integer;
       Destination : T_Adresse_IP; -- PROBLEME: FICHIERS QUI S'IMPLIQUENT MUTUELLEMENT : A REGLER!!!!!
-      MASQUE : T_Adresse_IP;
-      INT : T_interface;
+      Masque : T_Adresse_IP;
+      Int : T_interface;
    end record;
 end LISTES;
