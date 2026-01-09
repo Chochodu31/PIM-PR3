@@ -10,11 +10,11 @@ package Fonctions_globales is
    package Adresse_IP_IO is new Modular_IO (T_Adresse_IP);
 
 
-   package LCA_routeur_simple is new LISTES (
+   package LCA_routeur_cache is new LISTES (
       T_interface => Unbounded_String,
       T_Adresse_IP => T_Adresse_IP
    );
-   use LCA_routeur_simple;
+   use LCA_routeur_cache;
 
 
    -- Créer la table de routage à partir d'un fichier
@@ -39,11 +39,11 @@ package Fonctions_globales is
 
 
    -- Traiter les paquets à router
-   procedure Traiter_les_paquets (Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_Liste);
+   procedure Traiter_les_paquets (Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_Liste; cache : in out T_LCA; Politique : in Tab_Politique ; Cache_Taille : in integer);
    
    function Id_ad_IP(Texte : in String) return T_Adresse_IP;
    
-   function association_ad_des (Tab_Routage : in T_Liste; Adresse_IP : in T_Adresse_IP) return Unbounded_String;
+   function association_ad_des (Cache : in T_LCA; Tab_Routage : in T_Liste; Adresse_IP : in T_Adresse_IP; Politique : in Tab_Politique; Cache_Taille : in integer) return Unbounded_String;
    
    procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_Liste);
    
