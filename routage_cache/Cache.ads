@@ -6,21 +6,9 @@ package Cache is
    UN_OCTET : constant T_Adresse_IP := 2 ** 8;
    type T_Politique_Cache is (FIFO, LRU, LFU);
 
-
-   type T_Cache is record
-      Destination : T_Adresse_IP;    
-      Masque      : T_Adresse_IP;    
-      Interface   : Unbounded_String; 
-      Frequence   : Integer;          -- Compteur d'utilisation pour LFU
-   end record;   
-
    -- Type du cash liste chaînée
    type T_Cache is limited private;   
    
-   -- Exceptions spécifiques au cache
-   Cache_Vide_Error : exception;
-   Taille_Cache_Error : exception;
-
    -- Affiche le contenu du cache
    procedure Afficher_Cache(Cache : T_Cache);
 
@@ -58,8 +46,8 @@ package Cache is
       Masque : T_Adresse_IP;
       Interface : Unbounded_String;
       Politique : T_Politique_Cache;
-      Taille_Max : Integer;
-      Compteur_Global : in out Integer
+      Taille_Max : Natural;
+      Compteur_Global : in out Natural
    );
 
    -- Supprime une entrée du cache selon la politique
@@ -92,5 +80,17 @@ package Cache is
       Masque : T_Adresse_IP
    );
 
+private
 
-end Cache;   
+   type T_Cellule;
+   type T_Cache is access T_Cellule;
+   
+   type T_Cellule is record
+      Destination : T_Adresse_IP;    
+      Masque      : T_Adresse_IP;    
+      Interface   : Unbounded_String; 
+      Frequence   : Integer;          
+      Suivant     : T_Cache;          
+   end record;
+
+end Cache; 

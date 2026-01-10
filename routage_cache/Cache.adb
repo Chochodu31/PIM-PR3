@@ -40,13 +40,15 @@ package body Cache is
       Destination : T_Adresse_IP;
       Masque : T_Adresse_IP
    ) return Boolean is
-      Current : T_Cache := Cache;
+      Courant : T_Cache := Cache;
    begin
-      while Current /= null loop
-         if Current.Destination = Destination and Current.Masque = Masque then
+      while Courant /= null loop
+         if Courant.Destination = Destination and Courant.Masque = Masque then
             return True;
+         else
+            Null;   
          end if;
-         Current := Current.Suivant;
+         Courant := Courant.Suivant;
       end loop;
       return False;
    end Route_Dans_Cache;
@@ -56,14 +58,15 @@ package body Cache is
       Destination : T_Adresse_IP;
       Masque : T_Adresse_IP
    ) is
-      Current : T_Cache := Cache;
+      Courant : T_Cache := Cache;
    begin
-      while Current /= null loop
-         if Current.Destination = Destination and Current.Masque = Masque then
-            Current.Frequence := Current.Frequence + 1;
-            exit;
+      while Courant /= null loop
+         if Courant.Destination = Destination and Courant.Masque = Masque then
+            Courant.Frequence := Courant.Frequence + 1;
+         else
+            Null;
          end if;
-         Current := Current.Suivant;
+         Courant := Courant.Suivant;
       end loop;
    end Incrementer_Frequence;
 
@@ -79,7 +82,8 @@ package body Cache is
       while Courant /= null loop
          if Courant.Destination = Destination and Courant.Masque = Masque then
             Trouver := Courant;
-            exit;
+         else
+            Null;
          end if;
          Prev := Courant;
          Courant := Courant.Suivant;
