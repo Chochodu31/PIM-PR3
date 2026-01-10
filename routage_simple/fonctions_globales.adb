@@ -56,9 +56,15 @@ package body Fonctions_globales is
       Put (Sortie, Natural  (M1 mod UN_OCTET), 1);
    end Ecrire_Ad_IP;
 
+    -- Convertir un character a un entier. 
+    	function valeur_numerique(c : Character) return Integer is
+    	begin
+    		return Character'Pos(c) - Character'Pos('0');
+    	end valeur_numerique;
+      
 
-   --  -- Convertir une chaine en T_Adresse_IP
-   --  -- Exception : Adresse_IP_Introuvable_Error si échec de transformation   
+   --  Convertir une chaine en T_Adresse_IP
+   --  Exception : Adresse_IP_Introuvable_Error si échec de transformation   
    function Id_ad_IP(Texte : in String) return T_Adresse_IP is
       type Tab_Octets is array (1..4) of T_Octet;
       adresse_IP : T_Adresse_IP;
@@ -66,12 +72,6 @@ package body Fonctions_globales is
       indice_octet : Integer := 1;
       valeur_courante : Integer := 0;
       caractere : Character;
-      
-      -- Convertir un character a un entier. 
-      function valeur_numerique(c : Character) return Integer is
-      begin
-         return Character'Pos(c) - Character'Pos('0');
-      end valeur_numerique;
       
    begin
       -- Etape 1: Decomposer adresse IP.
