@@ -58,8 +58,8 @@ package Cache is
       Masque : T_Adresse_IP;
       Interface : Unbounded_String;
       Politique : T_Politique_Cache;
-      Taille_Max : Natural;
-      Compteur_Global : in out Natural
+      Taille_Max : Integer;
+      Compteur_Global : in out Integer
    );
 
    -- Supprime une entrée du cache selon la politique
@@ -91,5 +91,6 @@ package Cache is
       Destination : T_Adresse_IP;
       Masque : T_Adresse_IP
    );
+
 
 end Cache;   
