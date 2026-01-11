@@ -117,15 +117,39 @@ package body Cache is
             -- FIFO ne met a jour rien
             null;
          when LRU =>
+            -- Pour LRU, on doit déplacer l'élément en tête et mettre a jour frequence
+               Prev : T_Cache := null;
+               Prev_Trouver : T_Cache := null;
+               Trouver : T_Cache := null;
+               Courant : T_Cache := Cache;
             begin
-               while Courant /= null loop
+               -- Chercher l'élément et son précédent
+               while Temp /= null loop
                   if Courant.Destination = Destination and Courant.Masque = Masque then
-                     Courant.Frequence := Compteur_Global;
+                     Trouver := Courant;
+                     Prev_Trouver := Prev;
                   else
                      null;
                   end if;
+                  Prev := Courant;
                   Courant := Courant.Suivant;
                end loop;
+               
+               -- Si trouvé et pas déjà en tête
+               if Trouver /= null and then Prev_Trouver /= null then
+                  -- Retirer l'élément de sa position
+                  Prev_Trouver.Suivant := Trouver.Suivant;
+                  -- Mettre à jour frequence
+                  Trouver.Frequence := Compteur_Global;
+                  -- Placer l'élément en tête
+                  Trouver.Suivant := Cache;
+                  Cache := Trouver;
+               elsif Trouver /= null then
+                  -- Juste mettre à jour frequence
+                  Trouver.Frequence := Compteur_Global;
+               else
+                  null;
+               end if;
             end;
          when LFU =>
             -- incrémenter la fréquence pour LFU
@@ -305,6 +329,7 @@ package body Cache is
 
 
 end Cache;
+
 
 
 
