@@ -78,12 +78,13 @@ package body Cache is
       Masque : T_Adresse_IP
    ) is
       Courant : T_Cache := Cache;
-      Prev : T_Cache := null;
       Trouver : T_Cache := null;
+      Prev_Trouver : T_Cache := null;
    begin
       while Courant /= null loop
          if Courant.Destination = Destination and Courant.Masque = Masque then
             Trouver := Courant;
+            Prev_Trouver := Courant;
          else
             Null;
          end if;
@@ -91,12 +92,14 @@ package body Cache is
          Courant := Courant.Suivant;
       end loop;
       -- Si l'élément existe mais pas en tête
-      if Trouver /= null and then Prev /= null then
+      if Trouver /= null and then Prev_Trouver /= null then
          -- Retirer l'élément de sa position
-         Prev.Suivant := Trouver.Suivant;
+         Prev_Trouver.Suivant := Trouver.Suivant;
          -- Placer l'élément en tête
          Trouver.Suivant := Cache;
          Cache := Trouver;
+      else
+         null;
       end if;
    end Deplacer_En_Tete;               
 
@@ -113,6 +116,17 @@ package body Cache is
          when FIFO =>
             -- FIFO ne met a jour rien
             null;
+         when LRU =>
+            begin
+               while Courant /= null loop
+                  if Courant.Destination = Destination and Courant.Masque = Masque then
+                     Courant.Frequence := Compteur_Global;
+                  else
+                     null;
+                  end if;
+                  Courant := Courant.Suivant;
+               end loop;
+            end;
          when LFU =>
             -- incrémenter la fréquence pour LFU
             Incrementer_Frequence(Cache, Destination, Masque);
@@ -140,6 +154,30 @@ package body Cache is
             A_Retirer := Cache;
             Cache := Cache.Suivant;
             Free(A_Retirer);
+         when LRU =>
+            Min_Freq := Integer'Last;
+            Courant := Cache;
+            Prev := null;    
+            while Courant /= null loop
+               if Courant.Frequence < Min_Freq then
+                  Min_Freq := Courant.Frequence;
+                  A_Retirer := Courant;
+                  Prev_A_Retirer := Prev;
+               else
+                  null;
+               end if;
+               Prev := Courant;
+               Courant := Courant.Suivant;
+            end loop;
+            if A_Retirer /= null then
+               if Prev_A_Retirer = null then
+                  -- C'est la tête de liste
+                  Cache := A_Retirer.Suivant;
+               else
+                  Prev_A_Retirer.Suivant := A_Retirer.Suivant;
+               end if;
+               Free(A_Retirer);
+            end if;
          when LFU =>
             -- Trouver l'élément avec la plus petite fréquence
             Min_Freq := Integer'Last;
@@ -267,4 +305,5 @@ package body Cache is
 
 
 end Cache;
+
 
