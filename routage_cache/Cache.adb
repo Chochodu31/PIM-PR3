@@ -84,11 +84,11 @@ package body Cache is
       while Courant /= null loop
          if Courant.Destination = Destination and Courant.Masque = Masque then
             Trouver := Courant;
-            Prev_Trouver := Courant;
+            Prev_Trouver := Trouver;
          else
             Null;
          end if;
-         Prev := Courant;
+         Prev_Trouver := Courant;
          Courant := Courant.Suivant;
       end loop;
       -- Si l'élément existe mais pas en tête
@@ -305,5 +305,6 @@ package body Cache is
 
 
 end Cache;
+
 
 
