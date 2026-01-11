@@ -6,6 +6,9 @@ package Cache is
    UN_OCTET : constant T_Adresse_IP := 2 ** 8;
    type T_Politique_Cache is (FIFO, LRU, LFU);
 
+   Cache_Vide_Error : exception;
+   Taille_Cache_Error : exception;
+
    -- Type du cash liste chaînée
    type T_Cache is limited private;   
    
@@ -95,3 +98,4 @@ private
 
 
 end Cache; 
+
