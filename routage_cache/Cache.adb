@@ -3,6 +3,8 @@ with Ada.Unchecked_Deallocation;
 
 package body Cache is
 
+   procedure Free is new Ada.Unchecked_Deallocation(T_Cellule, T_Cache);
+
    procedure Initialiser(Cache : out T_Cache) is
    begin
       Cache := null;
@@ -265,3 +267,4 @@ package body Cache is
 
 
 end Cache;
+
