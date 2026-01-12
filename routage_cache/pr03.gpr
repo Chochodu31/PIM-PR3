@@ -1,7 +1,7 @@
 project PR03 is
    for main use (
       "lca.adb", 
-      "routage_simple.adb"
+      "routage.adb"
    );
 
    package Builder is

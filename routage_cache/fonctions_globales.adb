@@ -1,4 +1,3 @@
-with LCA;
 with Routeur_exceptions; use Routeur_exceptions;
 with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
@@ -10,8 +9,6 @@ package body Fonctions_globales is
 
    type T_Octet is mod 2 ** 8;
 
-   
-   
    -- Afficher l'adresse IP.
    -- Exemple d'affichage : 
    -- 32.248.90.14
@@ -27,22 +24,22 @@ package body Fonctions_globales is
    end Afficher_Ad_IP;
 
 
-   procedure Afficher_Cle_Integer (Cle: in Integer) is
-   begin
-      Put(Cle, 1);
-   end Afficher_Cle_Integer;
+   --  procedure Afficher_Cle_Integer (Cle: in Integer) is
+   --  begin
+   --     Put(Cle, 1);
+   --  end Afficher_Cle_Integer;
 
 
-   procedure Afficher_Donnee_Case (Val: in T_Case) is
-   begin
-      Put ("(");
-      Afficher_Ad_IP (Val.Destination);
-      Put (", ");
-      Afficher_Ad_IP (Val.Masque);
-      Put (", ");
-      Put (To_String (Val.Int));
-      Put (")");
-   end Afficher_Donnee_Case;
+   --  procedure Afficher_Donnee_Case (Val: in T_Case) is
+   --  begin
+   --     Put ("(");
+   --     Afficher_Ad_IP (Val.Destination);
+   --     Put (", ");
+   --     Afficher_Ad_IP (Val.Masque);
+   --     Put (", ");
+   --     Put (To_String (Val.Int));
+   --     Put (")");
+   --  end Afficher_Donnee_Case;
 
 
    -- Ecrire dans le Fichier Sortie l'adresse M1
@@ -152,7 +149,7 @@ package body Fonctions_globales is
    end Id_ad_IP;
 
 
-   procedure Table_routage (Table: in String; Tab_routage : in out T_LCA) is
+   procedure Table_routage (Table: in String; Tab_routage : in out T_Liste) is
       type T_Tab is array (1..3) of Unbounded_String;
       Entree : File_Type;
       Compteur_Espace : Boolean;
@@ -162,7 +159,7 @@ package body Fonctions_globales is
       Masque : T_Adresse_IP;
       Tab : T_Tab;
       Int : Unbounded_String;
-      Taille_Var : Integer;      
+      --  Taille_Var : Integer;      
 
    begin
       -- Initialiser la création de la table de routage
@@ -326,37 +323,24 @@ package body Fonctions_globales is
 
    -- Association de l'adresse IP et de Destination dans la table de routage.
    -- Exception : Adresse_IP_Introuvable_Error si il n'y à pas de Destination et de Masque qui correspondent à l'adresse IP
-   function association_ad_des (Cache : In T_LCA ; Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP; politique : in Tab_Politique; Cache_Taille : in integer) return Unbounded_String is
-      Masque : T_Adresse_IP;
+   function association_ad_des (Cache : In out T_Liste ; Tab_Routage : in T_Liste; Adresse_IP : in T_Adresse_IP; Politique : in Tab_Politique; Cache_Taille : in integer) return Unbounded_String is
       Association : Integer;
-      Valeur : T_Case;
       Int : Unbounded_String;
    begin
-      Masque := 0;
       Association := 0;
-      for i in 1..Taille (Cache) loop
-         begin
-            Valeur := La_Valeur (Cache, i);
-            if ((Adresse_IP and Valeur.Masque) = Valeur.Destination) and (Masque <= Valeur.Masque) then
-               Association := Association + 1;
-               Masque := Valeur.Masque;
-               Int := Valeur.Int;
-            else
-               null;
-            end if;
-         exception
-            when Cle_Absente_Error => Null;
-         end;
-      end loop;
-
+      begin
+         Int := association_liste(Cache);
+         Association := 1;
+      exception
+         when Cle_Absente_Error => null;
+      end;
       if Association = 0 then
-         Associer_routeur(cache,Table_routage,Politique);
-         Ajout_cache(Tab_routage, Adresse_IP, Cache, politique, Cache_Taille, enregistrement);
-         if Association=0 then
-            raise Adresse_IP_Introuvable_Error;
-         else
-            null;
-         end if;
+         begin
+            Int := association_liste(Tab_routage);
+            Ajout_cache(Tab_routage, Adresse_IP, Cache, politique, Cache_Taille);
+         exception
+            when Cle_Absente_Error => Adresse_IP_Introuvable_Error;
+         end;
       else
          Null;
       end if;
@@ -364,21 +348,20 @@ package body Fonctions_globales is
    end association_ad_des;
 
 
--- associer_routeur
-
-   procedure Associer_routeur(Cache : in T_LCA ; Tab_Routage  : in T_LCA ; Politique : in Tab_Politique)  is
-      valeur: integer;
-   begin
-      for i in 1..Taille(Table_routage) loop
-         begin
-            valeur := valeur(Tab_routage,i);
-            association_ad_des(Cache,tab_routage, T_Adresse_IP,Politique, Cache_Taille);
-         exception
-            when Cle_Absente_Error=>null;
-         end;
+--  -- associer_routeur
+--     procedure Associer_routeur(Cache : in T_LCA ; Tab_Routage  : in T_LCA ; Politique : in Tab_Politique)  is
+--        valeur: integer;
+--     begin
+--        for i in 1..Taille(Table_routage) loop
+--           begin
+--              valeur := valeur(Tab_routage,i);
+--              association_ad_des(Cache,tab_routage, T_Adresse_IP,Politique, Cache_Taille);
+--           exception
+--              when Cle_Absente_Error=>null;
+--           end;
       
-      end loop;
-   end associer_routeur;
+--        end loop;
+--     end associer_routeur;
 
 
    -- Ecrire dans le fichier de Sortie l'adressse IP et l'interface associé
@@ -393,13 +376,13 @@ package body Fonctions_globales is
 
    -- Identifier la commande écrite
    -- Exception : Commande_Inconnu_Error si la ligne de commande ne respecte pas les critères demandés
-   procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA) is
+   procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_Liste; Cache : in T_Liste) is
    begin
       if Texte = "table" then
-         Afficher_table_routage (Tab_routage);
+         Afficher_R_C (Tab_routage);
                
       elsif Texte = "cache" then
-         Put ("Commande non programmé: affichage Cache");
+         Afficher_R_C (Cache);
                
       elsif Texte = "stat" then
          Put ("Commande non programmé: Affichafe stat Cache");
@@ -416,16 +399,12 @@ package body Fonctions_globales is
    end Identifier_commande;
 
 
-   -- with Fonctions_globales;
-   procedure Traiter_les_paquets(Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_LCA) is
+   procedure Traiter_les_paquets(Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_Liste; Cache : in out T_Liste; Politique : in Tab_Politique; Cache_Taille : in Integer) is
       Texte : Unbounded_String;
       Ligne : Integer;
       IP_cmd : Boolean;
       Adresse_IP : T_Adresse_IP;
       Int : Unbounded_String;
-      Politique : Fonctions_globales.Tab_Politique;
-      Cache_Taille : integer;
-      Cache : T_LCA;
    begin
       begin 
          while not End_Of_File (Entree) loop
@@ -444,11 +423,11 @@ package body Fonctions_globales is
                Adresse_IP := Id_ad_IP (To_String(Texte));
 
                -- Associer adresse IP et Interface
-               Int := Association_ad_des (Cache,Tab_Routage, Adresse_IP,Politique,Cache_Taille);
+               Int := association_ad_des (Cache, Tab_Routage, Adresse_IP, Politique, Cache_Taille);
                Ecrire (Sortie, Adresse_IP, To_String(Int));
             else
                -- Identifier commande
-               Identifier_commande (To_String(Texte), Ligne, Tab_routage);
+               Identifier_commande (To_String(Texte), Ligne, Tab_routage, Cache);
 
             end if;
          end loop;

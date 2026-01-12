@@ -1,9 +1,9 @@
-with Fonctions_globales;
 generic
    type T_interface is private;
    type T_Adresse_IP is private;
 
 package LISTES is
+   type Tab_Politique is (FIFO, LRU, LFU);
    type T_Liste is limited private;
 
 
@@ -21,8 +21,14 @@ package LISTES is
 
 
    -- Enregistrer une valeur dans la liste
-   procedure Enregistrer_routage(liste : in out T_Liste; Frequence : Integer; Destination : T_Adresse_IP; Masque : T_Adresse_IP; Int : T_interface);
-
+   --  procedure Enregistrer_routage(liste : in out T_Liste; Frequence : Integer; Destination : T_Adresse_IP; Masque : T_Adresse_IP; Int : T_interface);
+   function association_liste(Liste: in T_Liste) return T_interface;
+   
+   procedure Ajout_cache(Routage: in T_Liste; Adresse_IP : in T_Adresse_IP; Cache : in out T_Liste; politique : in Tab_politique; Cache_Taille : in Integer);
+   
+   generic
+      with procedure Afficher_Adresse_IP (Adresse_IP : in T_Adresse_IP);
+   procedure Afficher_Liste (Liste : in T_Liste);
 
 private
    type T_Cellule;

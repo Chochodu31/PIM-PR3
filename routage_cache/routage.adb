@@ -1,10 +1,10 @@
 with Ada.Text_IO;		use Ada.Text_IO;
 with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
 with Fonctions_globales;   use Fonctions_globales;
-use Fonctions_globales.LCA_routeur_simple;
+use Fonctions_globales.Routeur_cache;
 with ada.Integer_Text_IO;  use ada.Integer_Text_IO;
 
-procedure Routage_simple is
+procedure Routage is
 
 	Cache_Taille : Integer;  -- Taille du cache
 	Politique: Tab_Politique;  -- Politique de traitement de cache
@@ -12,9 +12,10 @@ procedure Routage_simple is
 	Table : Unbounded_String;  -- Nom du fichier contenant les éléments de la table de routage
 	Paquet : Unbounded_String; -- Nom du fichier contenant les éléments à router
 	Resultat : Unbounded_String;  -- Nom du fichier dans lequel écrire les résultats
-   Tab_routage : T_LCA; -- Table de routage
+   Tab_routage : T_Liste; -- Table de routage
    Entree : File_Type;  -- Fichier d'entrée
 	Sortie : File_Type;  -- Fichier de sortie
+   Cache : T_Liste;  -- Table de cache
 	
 begin
    -- Comprendre la ligne de commande
@@ -24,6 +25,7 @@ begin
    -- Créer la table de routage
    Initialiser (Tab_routage);
    Table_routage(To_String(Table), Tab_routage);
+   Initialiser(Cache);
 
 
    -- Mettre en place l'entrée et la sortie
@@ -32,7 +34,7 @@ begin
 
 
    -- Traiter les paquets à router
-   Traiter_les_paquets (Entree, Sortie, Tab_routage);
+   Traiter_les_paquets (Entree, Sortie, Tab_routage, Cache, Politique, Cache_Taille);
 
 
    -- Fermer les fichiers
@@ -64,4 +66,4 @@ begin
    else
       Put("Politique choisi : LFU");
    end if;
-end Routage_simple;
+end Routage;
