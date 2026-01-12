@@ -1,7 +1,6 @@
 with Routeur_exceptions; use Routeur_exceptions;
 with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
-with Sda_Exceptions;		use Sda_Exceptions;
 with Ada.Strings; 		use Ada.Strings;
 
 
@@ -196,7 +195,7 @@ package body Fonctions_globales is
          Masque := Id_ad_IP (To_String (Tab(2)));
          Destination := Id_ad_IP(To_String(Tab(1)));
          Int := Tab(3);
-         Enregistrer_routage (tab_routage, 0, Destination, Masque, Int);
+         Ajout_routeur (tab_routage, Destination, Masque, Int);
       end loop;
       
       Close (Entree);
@@ -323,24 +322,20 @@ package body Fonctions_globales is
 
    -- Association de l'adresse IP et de Destination dans la table de routage.
    -- Exception : Adresse_IP_Introuvable_Error si il n'y à pas de Destination et de Masque qui correspondent à l'adresse IP
-   function association_ad_des (Cache : In out T_Liste ; Tab_Routage : in T_Liste; Adresse_IP : in T_Adresse_IP; Politique : in Tab_Politique; Cache_Taille : in integer) return Unbounded_String is
+   function association_ad_des (Cache : in out T_Liste ; Tab_Routage : in T_Liste; Adresse_IP : in T_Adresse_IP; Politique : in Tab_Politique; Cache_Taille : in integer) return Unbounded_String is
       Association : Integer;
       Int : Unbounded_String;
    begin
       Association := 0;
-      begin
-         Int := association_liste(Cache);
-         Association := 1;
-      exception
-         when Cle_Absente_Error => null;
-      end;
+      Int := association_liste(Cache, Adresse_IP, Association);
       if Association = 0 then
-         begin
-            Int := association_liste(Tab_routage);
-            Ajout_cache(Tab_routage, Adresse_IP, Cache, politique, Cache_Taille);
-         exception
-            when Cle_Absente_Error => Adresse_IP_Introuvable_Error;
-         end;
+         Int := association_liste(Tab_routage, Adresse_IP, Association);
+         Ajout_cache(Tab_routage, Adresse_IP, Cache, politique, Cache_Taille);
+         if Association = 0 then
+            raise Adresse_IP_Introuvable_Error;
+         else
+            Null;
+         end if;
       else
          Null;
       end if;
