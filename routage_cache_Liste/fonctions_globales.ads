@@ -12,17 +12,39 @@ package Fonctions_globales is
 
    package Routeur_cache is new LISTES (
       T_interface => Unbounded_String,
-      T_Adresse_IP => T_Adresse_IP
+      T_Adresse_IP => T_Adresse_IP,
+      POIDS_FORT => 2 ** 31
    );
    use Routeur_cache;
 
-
+   procedure Afficher_int_ici(Int : in Unbounded_String);
 
    procedure Afficher_Ad_IP (M1 : in T_Adresse_IP);
    
    procedure Afficher_R_C is new Afficher_Liste(
-      Afficher_Adresse_IP => Afficher_Ad_IP
+      Afficher_Adresse_IP => Afficher_Ad_IP,
+      Afficher_Int => Afficher_int_ici
    );
+
+   function inf_ici(Masque_nouv : in T_Adresse_IP; Masque : in T_Adresse_IP) return Boolean;
+   function Et_ici (Adresse_IP : in T_Adresse_IP; Masque : in T_Adresse_IP) return T_Adresse_IP;
+   procedure Asso is new association_liste(
+      Et => Et_ici,
+      inf => inf_ici
+   );
+
+   function Produit_ici(Destination : in T_Adresse_IP; bit : in Integer) return T_Adresse_IP;
+   procedure Asso_ici(Masque : in out T_Adresse_IP; Int : in Integer);
+   procedure Rien_ici(Masque : in out T_Adresse_IP);
+   procedure Dest is new Dest_Masq_Max(
+      Et => Et_ici,
+      Produit => produit_ici,
+      Rien => Rien_ici,
+      Association_int => Asso_ici
+   );
+
+
+   procedure Ajout_cache(Routage: in T_Liste; Cellule : in T_Liste; Adresse_IP : in T_Adresse_IP; Cache : in out T_Liste; politique : in Tab_politique; Cache_Taille : in Integer);
 
 
    -- Créer la table de routage à partir d'un fichier

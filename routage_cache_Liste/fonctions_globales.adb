@@ -2,11 +2,38 @@ with Routeur_exceptions; use Routeur_exceptions;
 with Ada.Integer_Text_IO; 	use Ada.Integer_Text_IO;
 with Ada.Command_Line;		use Ada.Command_Line;
 with Ada.Strings; 		use Ada.Strings;
+with SDA_Exceptions; use SDA_Exceptions;
+with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
+with Ada.Text_IO.Unbounded_IO;  use Ada.Text_IO.Unbounded_IO;
 
 
 package body Fonctions_globales is
 
    type T_Octet is mod 2 ** 8;
+
+
+      procedure Ajout_cache (Routage: in T_Liste; Cellule : in T_Liste; Adresse_IP : in T_Adresse_IP; Cache : in out T_Liste; politique : in Tab_Politique; Cache_Taille : in Integer) is
+      Destination : T_Adresse_IP;
+      Masque : T_Adresse_IP;
+      Int : Unbounded_String;
+   begin
+      Dest(Routage, Cellule, Adresse_IP, Masque, Destination);
+      if Cache_Taille = 0 then
+         Null;
+      elsif Taille(Cache) = Cache_Taille then
+         Elimination (Cache, politique);
+         Ajout_routeur (Cache, Destination, Masque, Int);
+      elsif Taille(Cache) < Cache_Taille then
+         Ajout_routeur(Cache, Destination, Masque, Int);
+      else
+         Raise Taille_Cache_Error;
+      end if;
+   end Ajout_cache;
+
+   procedure Afficher_int_ici(Int : in Unbounded_String) is 
+   begin
+      Put(To_String(Int));
+   end Afficher_int_ici;
 
    -- Afficher l'adresse IP.
    -- Exemple d'affichage : 
@@ -22,6 +49,30 @@ package body Fonctions_globales is
       Put (Natural  (M1 mod UN_OCTET), 1);
    end Afficher_Ad_IP;
 
+   function Et_ici (Adresse_IP : in T_Adresse_IP; Masque : in T_Adresse_IP) return T_Adresse_IP is
+   begin
+      return Adresse_IP and Masque;
+   end Et_ici;
+   
+   function inf_ici(Masque_nouv : in T_Adresse_IP; Masque : in T_Adresse_IP) return Boolean is
+   begin
+      return Masque_nouv <= Masque;
+   end inf_ici;
+
+   function Produit_ici(Destination : in T_Adresse_IP; bit : in Integer) return T_Adresse_IP is
+   begin
+      return Destination * (2**bit);
+   end Produit_ici;
+
+   procedure Asso_ici(Masque : in out T_Adresse_IP; Int : in Integer) is
+   begin
+      Masque := 2 ** Int;
+   end Asso_ici;
+
+   procedure Rien_ici(Masque : in out T_Adresse_IP) is 
+   begin
+      Masque := 0;
+   end Rien_ici;
 
    --  procedure Afficher_Cle_Integer (Cle: in Integer) is
    --  begin
@@ -325,19 +376,20 @@ package body Fonctions_globales is
    function association_ad_des (Cache : in out T_Liste ; Tab_Routage : in T_Liste; Adresse_IP : in T_Adresse_IP; Politique : in Tab_Politique; Cache_Taille : in integer) return Unbounded_String is
       Association : Integer;
       Int : Unbounded_String;
+      Cellule : T_Liste;
    begin
       Association := 0;
-      Int := association_liste(Cache, Adresse_IP, Association);
+      Asso(Cache, Adresse_IP, Association, Int, Cellule);
       if Association = 0 then
-         Int := association_liste(Tab_routage, Adresse_IP, Association);
-         Ajout_cache(Tab_routage, Adresse_IP, Cache, politique, Cache_Taille);
+         Asso(Tab_routage, Adresse_IP, Association, Int, Cellule);
+         Ajout_cache(Tab_routage, Cellule, Adresse_IP, Cache, politique, Cache_Taille);
          if Association = 0 then
             raise Adresse_IP_Introuvable_Error;
          else
             Null;
          end if;
       else
-         Null;
+         Ordre(Cache, Cellule, politique);
       end if;
       return Int;
    end association_ad_des;
