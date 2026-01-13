@@ -1,244 +1,269 @@
-with Ada.Text_IO;               use Ada.Text_IO;
-with Ada.Strings.Unbounded;     use Ada.Strings.Unbounded;
-with Ada.Integer_Text_IO;       use Ada.Integer_Text_IO;
-with Fonctions_globales;        use Fonctions_globales;
-use Fonctions_globales.LCA_routeur_simple;
-with Cache_Arbre;               use Cache_Arbre;
+with Ada.Text_IO;                    use Ada.Text_IO;
+with Ada.Strings.Unbounded;          use Ada.Strings.Unbounded;
+with Ada.Integer_Text_IO;            use Ada.Integer_Text_IO;
+with Ada.Float_Text_IO;              use Ada.Float_Text_IO;
+with Ada.Command_Line;               use Ada.Command_Line;
+with Fonctions_globales;             use Fonctions_globales;
+with Cache_Arbre;                    use Cache_Arbre;
+with SDA_Exceptions;                 use SDA_Exceptions;
+with Routeur_exceptions;             use Routeur_exceptions;
 
 procedure Routeur_LA is
-
-   Cache_Taille   : Integer;           
-   Politique      : Tab_Politique;     
-   Statistique    : Boolean;        
-   Table          : Unbounded_String;  
-   Paquet         : Unbounded_String;  
-   Resultat       : Unbounded_String;  
-   Tab_routage    : T_LCA;           
-   Cache          : T_Cache;          
-   Entree         : File_Type;        
-   Sortie         : File_Type;         
    
-   Ligne_Compteur : Integer := 0;     
-   Fin_Traitement : Boolean := False;  
-
-   function Calculer_Masque_Adapte (Destination : T_Adresse_IP; Masque_Route : T_Adresse_IP) return T_Adresse_IP is
-   begin
-      return Masque_Route;
-   end Calculer_Masque_Adapte;
-
-   function Trouver_Route (Adresse_IP : T_Adresse_IP) return T_Case is
-      Masque_Max : T_Adresse_IP := 0;
-      Meilleure_Route : T_Case;
-      Route_Temp : T_Case;
-      Trouvee : Boolean := False;
-   begin
-      for I in 1 .. Taille(Tab_routage) loop
-         begin
-            Route_Temp := La_Valeur(Tab_routage, I);
-            if (Adresse_IP and Route_Temp.Masque) = Route_Temp.Destination then
-               if Route_Temp.Masque >= Masque_Max then
-                  Masque_Max := Route_Temp.Masque;
-                  Meilleure_Route := Route_Temp;
-                  Trouvee := True;
-               end if;
-            end if;
-         exception
-            when Cle_Absente_Error => null;
-         end;
-      end loop;
-      
-      if not Trouvee then
-         raise Adresse_IP_Introuvable_Error;
-      end if;
-      
-      return Meilleure_Route;
-   end Trouver_Route;
-
-   -- Traiter une ligne de commande
-   procedure Traiter_Commande (Texte : in String; Ligne : in Integer) is
-   begin
-      if Texte = "table" then
-         Put_Line("table (ligne" & Integer'Image(Ligne) & ")");
-         Afficher_table_routage(Tab_routage);
-         
-      elsif Texte = "cache" then
-         Put_Line("cache (ligne" & Integer'Image(Ligne) & ")");
-         Afficher(Cache);
-         
-      elsif Texte = "stat" then
-         Put_Line("stat (ligne" & Integer'Image(Ligne) & ")");
-         declare
-            Defauts, Demandes : Integer;
-            Taux : Float;
-         begin
-            Obtenir_Statistiques(Cache, Defauts, Demandes, Taux);
-            Put("Défauts de cache : ");
-            Put(Defauts, 1);
-            New_Line;
-            Put("Demandes de route : ");
-            Put(Demandes, 1);
-            New_Line;
-            Put("Taux de défauts : ");
-            Put(Float'Image(Taux));
-            New_Line;
-         end;
-         
-      elsif Texte = "fin" then
-         Put_Line("fin (ligne" & Integer'Image(Ligne) & ")");
-         Fin_Traitement := True;
-         
-      else
-         Put_Line("Erreur : commande inconnue à la ligne" & Integer'Image(Ligne));
-         raise Commande_Inconnu_Error;
-      end if;
-   end Traiter_Commande;
-
-   -- Traiter une adresse IP avec cache
-   procedure Traiter_Adresse_IP (Adresse_IP_Str : in String) is
-      Adresse_IP : T_Adresse_IP;
+   -- Variables pour les options de ligne de commande
+   Taille_Cache       : Integer;          -- Taille du cache (-c)
+   Politique_Cache    : Tab_Politique;    -- Politique de suppression (-p)
+   Afficher_Stats     : Boolean;          -- Afficher les statistiques (-s/-S)
+   Fichier_Table      : Unbounded_String; -- Fichier de table de routage (-t)
+   Fichier_Paquets    : Unbounded_String; -- Fichier de paquets à router (-q)
+   Fichier_Resultats  : Unbounded_String; -- Fichier de résultats (-r)
+   
+   -- Fichiers d'entrée/sortie
+   Fichier_Entree     : File_Type;
+   Fichier_Sortie     : File_Type;
+   
+   -- Structures de données
+   Table_Routage      : T_LCA;            -- Table de routage complète
+   Cache              : T_Cache;          -- Cache des routes
+   
+   -- Statistiques d'exécution
+   Nb_Paquets_Traites : Integer := 0;     -- Nombre total de paquets traités
+   Nb_Defauts_Cache   : Integer := 0;     -- Défauts de cache pendant l'exécution
+   
+   -- Rechercher une interface pour une adresse IP en utilisant le cache
+   function Obtenir_Interface_Cachee(Adresse_IP : T_Adresse_IP) return Unbounded_String is
       Interface_Trouvee : Unbounded_String;
-      Route : T_Case;
-      Masque_Adapte : T_Adresse_IP;
+      Valeur_Temp       : T_Case;
    begin
-      -- Convertir l'adresse IP
-      Adresse_IP := Id_ad_IP(Adresse_IP_Str);
-      
-      -- Incrémenter le compteur de demandes
-      Cache.Nb_Demandes := Cache.Nb_Demandes + 1;
-      
-      -- Chercher dans le cache d'abord
       begin
+         -- Essaie d'abord de trouver dans le cache
          Interface_Trouvee := Rechercher(Cache, Adresse_IP);
-         -- Cache hit : mettre à jour selon politique
-         if Politique = LRU then
-            null; 
-         elsif Politique = LFU then
-            null; 
-         end if;
+         
+         -- Met à jour les métadonnées selon la politique
+         case Politique_Cache is
+            when LRU =>
+               -- Pour LRU, on doit trouver la route correspondante pour mettre à jour son horodatage
+               declare
+                  Masque_Max : T_Adresse_IP := 0;
+               begin
+                  for i in 1..Taille(Table_Routage) loop
+                     begin
+                        Valeur_Temp := La_Valeur(Table_Routage, i);
+                        if ((Adresse_IP and Valeur_Temp.Masque) = Valeur_Temp.Destination) 
+                           and (Valeur_Temp.Masque >= Masque_Max) then
+                           Masque_Max := Valeur_Temp.Masque;
+                        end if;
+                     exception
+                        when Cle_Absente_Error => null;
+                     end;
+                  end loop;
+               end;
+               
+            when LFU =>
+               -- Même approche pour LFU (incrémenter le compteur d'accès)
+               declare
+                  Masque_Max : T_Adresse_IP := 0;
+               begin
+                  for i in 1..Taille(Table_Routage) loop
+                     begin
+                        Valeur_Temp := La_Valeur(Table_Routage, i);
+                        if ((Adresse_IP and Valeur_Temp.Masque) = Valeur_Temp.Destination) 
+                           and (Valeur_Temp.Masque >= Masque_Max) then
+                           Masque_Max := Valeur_Temp.Masque;
+                        end if;
+                     exception
+                        when Cle_Absente_Error => null;
+                     end;
+                  end loop;
+               end;
+               
+            when others =>
+               null;  -- FIFO ne nécessite pas de mise à jour
+         end case;
+         
+         return Interface_Trouvee;
          
       exception
          when Cle_Absente_Error =>
-            Cache.Nb_Defauts := Cache.Nb_Defauts + 1;
+            -- Défaut de cache : route non trouvée dans le cache
+            Nb_Defauts_Cache := Nb_Defauts_Cache + 1;
             
-            -- Chercher dans la table de routage
-            Interface_Trouvee := Association_ad_des(Tab_routage, Adresse_IP);
+            -- Chercher dans la table de routage complète
+            Interface_Trouvee := Association_ad_des(Table_Routage, Adresse_IP);
             
-            -- Trouver la route complète pour obtenir destination et masque
-            Route := Trouver_Route(Adresse_IP);
-            
-            -- Calculer le masque adapté pour le cache
+            -- Ajouter la route trouvée au cache (avec éviction si nécessaire)
             declare
-               Masque_Adapte := Calculer_Masque_Adapte(Adresse_IP, Route.Masque);
+               Masque_Max     : T_Adresse_IP := 0;
+               Destination_Max : T_Adresse_IP;
+               Interface_Max  : Unbounded_String;
+               Valeur         : T_Case;
             begin
-               -- Vérifier si le cache est plein
+               -- Trouver la route avec le masque le plus long
+               for i in 1..Taille(Table_Routage) loop
+                  begin
+                     Valeur := La_Valeur(Table_Routage, i);
+                     if ((Adresse_IP and Valeur.Masque) = Valeur.Destination) 
+                        and (Valeur.Masque >= Masque_Max) then
+                        Masque_Max := Valeur.Masque;
+                        Destination_Max := Valeur.Destination;
+                        Interface_Max := Valeur.Int;
+                     end if;
+                  exception
+                     when Cle_Absente_Error => null;
+                  end;
+               end loop;
+               
+               -- Si le cache est plein, on supprime une route selon la politique
                if Taille(Cache) >= Cache.Taille_Max then
-                  -- Supprimer une entrée selon la politique
-                  case Politique is
+                  case Politique_Cache is
                      when FIFO => Supprimer_FIFO(Cache);
                      when LRU => Supprimer_LRU(Cache);
                      when LFU => Supprimer_LFU(Cache);
                   end case;
                end if;
                
-               -- Enregistrer la route dans le cache
-               Enregistrer(Cache, Route.Destination, Masque_Adapte, Interface_Trouvee);
+               -- Ajouter la nouvelle route au cache
+               Enregistrer(Cache, Destination_Max, Masque_Max, Interface_Max);
             end;
+            
+            return Interface_Trouvee;
       end;
-      Ecrire(Sortie, Adresse_IP, To_String(Interface_Trouvee));
-   end Traiter_Adresse_IP;
-
-   -- Traiter toutes les lignes du fichier d'entrée
-   procedure Traiter_Fichier is
-      Texte : Unbounded_String;
+   end Obtenir_Interface_Cachee;
+   
+   -- Traiter les commandes spéciales (table, cache, stat, fin)
+   procedure Traiter_Commande(Commande : String; Ligne : Integer) is
+      Nb_Defauts, Nb_Demandes : Integer;
+      Taux : Float;
    begin
-      while not End_Of_File(Entree) and then not Fin_Traitement loop
-         Texte := To_Unbounded_String(Get_Line(Entree));
-         Ligne_Compteur := Ligne_Compteur + 1;
-         Trim(Texte, Both);
+      if Commande = "table" then
+         -- Afficher la table de routage complète
+         Afficher_table_routage(Table_Routage);
          
-         if Length(Texte) > 0 then
-            if Element(Texte, 1) in '0' .. '9' then
-               Traiter_Adresse_IP(To_String(Texte));
+      elsif Commande = "cache" then
+         -- Afficher le contenu du cache
+         Put_Line("=== Contenu du cache ===");
+         Afficher(Cache);
+         Put_Line("Taille: " & Integer'Image(Taille(Cache)) & "/" & Integer'Image(Cache.Taille_Max));
+      elsif Commande = "stat" then
+         -- Afficher les statistiques si activées
+         if Afficher_Stats then
+            Obtenir_Statistiques(Cache, Nb_Defauts, Nb_Demandes, Taux);
+            Put_Line("=== Statistiques ===");
+            Put_Line("Taille cache: " & Integer'Image(Taille_Cache));
+            Put_Line("Politique: " & Tab_Politique'Image(Politique_Cache));
+            Put_Line("Demandes: " & Integer'Image(Nb_Demandes));
+            Put_Line("Défauts: " & Integer'Image(Nb_Defauts));
+            Put("Taux défauts: ");
+            Put(Taux, Fore => 1, Aft => 4, Exp => 0);
+            New_Line;
+            Put_Line("Paquets traités: " & Integer'Image(Nb_Paquets_Traites));
+         else
+            Put_Line("Statistiques désactivées (option -S)");
+         end if;
+      elsif Commande = "fin" then
+         -- Terminer le traitement
+         raise End_Error;
+      else
+         -- Commande inconnue
+         Put("Erreur ligne ");
+         Put(Ligne, 1);
+         New_Line;
+         raise Commande_Inconnu_Error;
+      end if;
+   end Traiter_Commande;
+   
+   -- Traiter le fichier de paquets ligne par ligne
+   procedure Traiter_Fichier_Paquets is
+      Ligne_Courante : Unbounded_String;
+      Numero_Ligne   : Integer := 0;
+      Adresse_IP     : T_Adresse_IP;
+      Interface      : Unbounded_String;
+   begin
+      while not End_Of_File(Fichier_Entree) loop
+         Ligne_Courante := To_Unbounded_String(Get_Line(Fichier_Entree));
+         Numero_Ligne := Numero_Ligne + 1;
+         Trim(Ligne_Courante, Both);
+         
+         if Length(Ligne_Courante) > 0 then
+            -- Déterminer si c'est une adresse IP ou une commande
+            if Element(Ligne_Courante, 1) in '0'..'9' then
+               -- Adresse IP : la route et écrire le résultat
+               begin
+                  Adresse_IP := Id_ad_IP(To_String(Ligne_Courante));
+                  Interface := Obtenir_Interface_Cachee(Adresse_IP);
+                  
+                  -- Écrire dans le fichier de sortie
+                  Ecrire_Ad_IP(Fichier_Sortie, Adresse_IP);
+                  Put(Fichier_Sortie, " ");
+                  Put(Fichier_Sortie, To_String(Interface));
+                  New_Line(Fichier_Sortie);
+                  
+                  Nb_Paquets_Traites := Nb_Paquets_Traites + 1;
+                  
+               exception
+                  when Adresse_IP_Introuvable_Error =>
+                     Put_Line("Erreur IP ligne" & Integer'Image(Numero_Ligne));
+               end;
             else
-               Traiter_Commande(To_String(Texte), Ligne_Compteur);
+               -- traitement d'une Commande spéciale
+               Traiter_Commande(To_String(Ligne_Courante), Numero_Ligne);
             end if;
          end if;
       end loop;
-   end Traiter_Fichier;
-
+   exception
+      when End_Error =>
+         null;  
+   end Traiter_Fichier_Paquets;
+   
 begin
-   -- Analyser la ligne de commande
-   Gerer_commandes(Cache_Taille, Politique, Statistique, Table, Paquet, Resultat);
-
-   -- Initialiser la table de routage
-   Initialiser(Tab_routage);
-   Table_routage(To_String(Table), Tab_routage);
-
-   -- Initialiser le cache
-   Initialiser(Cache, Cache_Taille);
-
-   -- Ouvrir les fichiers
-   Create(Sortie, Out_File, To_String(Resultat));
-   Ouvrir(To_String(Paquet), Entree);
-
-   -- Traiter le fichier
-   Traiter_Fichier;
-
-   -- Fermer les fichiers
-   Close(Entree);
-   Close(Sortie);
-
-   -- Afficher les statistiques 
-   if Statistique then
+   -- Lire les options de la ligne de commande
+   Gerer_commandes(
+      Cache => Taille_Cache,
+      Politique => Politique_Cache,
+      Statistique => Afficher_Stats,
+      Table => Fichier_Table,
+      Paquet => Fichier_Paquets,
+      Resultat => Fichier_Resultats
+   );
+   
+   -- Initialiser le cache avec la taille spécifiée
+   Initialiser(Cache, Taille_Cache);
+   
+   -- Charger la table de routage depuis le fichier
+   Initialiser(Table_Routage);
+   Table_routage(To_String(Fichier_Table), Table_Routage);
+   
+   -- Ouvrir les fichiers d'entrée et de sortie
+   Ouvrir(To_String(Fichier_Paquets), Fichier_Entree);
+   Create(Fichier_Sortie, Out_File, To_String(Fichier_Resultats));
+   
+   -- Traiter les paquets
+   Traiter_Fichier_Paquets;
+   
+   -- Afficher les statistiques finales si demandé
+   if Afficher_Stats then
       New_Line;
-      Put_Line("=== Statistiques ===");
-      Put("Taille du cache : ");
-      Put(Cache_Taille, 1);
-      New_Line;
-      Put("Politique utilisée : ");
-      case Politique is
-         when FIFO => Put("FIFO");
-         when LRU => Put("LRU");
-         when LFU => Put("LFU");
-      end case;
-      New_Line;
-      
-      declare
-         Defauts, Demandes : Integer;
-         Taux : Float;
-      begin
-         Obtenir_Statistiques(Cache, Defauts, Demandes, Taux);
-         Put("Nombre de demandes : ");
-         Put(Demandes, 1);
-         New_Line;
-         Put("Nombre de défauts : ");
-         Put(Defauts, 1);
-         New_Line;
-         Put("Taux de défauts : ");
-         if Demandes > 0 then
-            Put(Float'Image(Taux * 100.0) & "%");
-         else
-            Put("0.0%");
-         end if;
-         New_Line;
-      end;
+      Put_Line("=== FIN ===");
+      Put_Line("Paquets: " & Integer'Image(Nb_Paquets_Traites));
+      Put_Line("Défauts cache: " & Integer'Image(Nb_Defauts_Cache));
    end if;
-   Detruire(Tab_routage);
+   
+   -- Nettoyage des ressources
+   Close(Fichier_Entree);
+   Close(Fichier_Sortie);
+   Detruire(Table_Routage);
    Detruire(Cache);
-
+   
+   Put_Line("Terminé. Résultats dans " & To_String(Fichier_Resultats));
+   
 exception
    when Fichier_Inconnu_Error =>
-      Put_Line("Erreur : fichier introuvable");
+      Put_Line("Erreur: Fichier introuvable");
+      
    when Commande_Inconnu_Error =>
-      Put_Line("Erreur : commande inconnue");
+      Put_Line("Erreur: Commande inconnue");
+      
    when others =>
       Put_Line("Erreur inattendue");
-      if Is_Open(Entree) then
-         Close(Entree);
-      end if;
-      if Is_Open(Sortie) then
-         Close(Sortie);
-      end if;
-      raise;
-
+      
 end Routeur_LA;
