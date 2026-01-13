@@ -111,11 +111,9 @@ procedure Routeur_LA is
          Interface_Trouvee := Rechercher(Cache, Adresse_IP);
          -- Cache hit : mettre à jour selon politique
          if Politique = LRU then
-            -- Pour LRU, on devrait mettre à jour le timestamp
-            -- Mais notre Rechercher ne retourne pas la route exacte
-            null; -- À améliorer si nécessaire
+            null; 
          elsif Politique = LFU then
-            null; -- À améliorer si nécessaire
+            null; 
          end if;
          
       exception
@@ -242,4 +240,5 @@ exception
          Close(Sortie);
       end if;
       raise;
+
 end Routeur_LA;
