@@ -64,18 +64,18 @@ private
       Route      : T_Case;             -- Destination, Masque, Interface
       Est_Route  : Boolean := False;   -- Vrai si ce nœud est une route valide dans le cache
       Enfants    : array (0 .. 1) of T_Trie := (others => null);
-      Clk        : Integer := 0;            -- date de modification pour LRU
-      Frequence  : Integer := 0;            -- Compteur d'accès pour LFU
+      Clk        : Integer ;            -- date de modification pour LRU
+      Frequence  : Integer ;            -- Compteur d'accès pour LFU
    end record;
 
    -- Le cache (arbre)
    type T_Cache is record
       Racine        : T_Trie := null;
       Taille_Max    : Integer;
-      Taille_Actuelle : Integer := 0;
-      Horloge       : Integer := 0;  -- Horloge globale incrémentée à chaque événement
-      Nb_Defauts    : Integer := 0;
-      Nb_Demandes   : Integer := 0;
+      Taille_Actuelle : Integer ;
+      Horloge       : Integer ;  -- Horloge globale incrémentée à chaque événement
+      Nb_Defauts    : Integer ;
+      Nb_Demandes   : Integer ;
    end record;
 
 end Cache_Arbre;
