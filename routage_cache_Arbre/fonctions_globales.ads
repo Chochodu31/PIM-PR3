@@ -24,6 +24,7 @@ package Fonctions_globales is
    );
    use LCA_routeur_simple;
 
+   procedure Afficher_Ad_IP(M1 : in T_Adresse_IP);
 
    -- Afficher une clé (Integer).
    procedure Afficher_Cle_Integer (Cle : in Integer);
