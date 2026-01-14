@@ -35,6 +35,7 @@ package Fonctions_globales is
       inf => inf_ici,
       Rien => Rien_ici,
       Rien_Interface => Rien_Interface_Ici
+      --  Afficher_Adresse_IP => Afficher_Ad_IP
    );
 
    function Produit_ici(Destination : in T_Adresse_IP; bit : in Integer) return T_Adresse_IP;

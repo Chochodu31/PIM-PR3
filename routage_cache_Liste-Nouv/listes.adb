@@ -1,6 +1,6 @@
 with Ada.Unchecked_Deallocation;
 with Ada.Text_IO; use Ada.Text_IO;
-with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
+--  with Ada.Integer_Text_IO;    use Ada.Integer_Text_IO;
 
 
 package body LISTES is
@@ -73,8 +73,15 @@ package body LISTES is
          end if;
          Actuelle := Actuelle.Suivant;
       end loop;
-      
+
+      --  New_Line;
+      --  Put("Association : ");
+      --  Put(Association);
+      --  New_Line;
       if Association /= 0 then
+         --  New_Line;
+         --  Put("Passage ici");
+         --  New_Line;
          Adresse.Frequence := Adresse.Frequence + 1;
          --  New_Line;
          --  Put("Adresse IP souvenir : ");
@@ -255,32 +262,35 @@ package body LISTES is
    end Elimination_LRU;
 
 
-   procedure Elimination_LFU(Liste : in T_Liste) is
-      Cellule_prec : T_Liste;
+   procedure Elimination_LFU(Liste : in out T_Liste) is
+      Actuelle_prec : T_Liste;
       Actuelle : T_Liste;
       Min : Integer;
       Cellule : T_Liste;
+      Cellule_prec : T_Liste;
    begin
       Min := Integer'Last;
       Actuelle := Liste;
-      if Actuelle = null then
-         null;
-      elsif Actuelle.Suivant = null then
-         Min := Actuelle.Frequence;
-      else
-         while Actuelle.Suivant /= null loop
-            if Actuelle.Suivant.Frequence < Min then
-               Min := Actuelle.Suivant.Frequence;
-               Cellule_prec := Actuelle;
-            else
-               null;
-            end if;
-            Actuelle := Actuelle.Suivant;
-         end loop;
-         Cellule := Cellule_prec.Suivant;
-         Cellule_prec.Suivant := Cellule.suivant;
-         Free(Cellule);
+      Actuelle_prec := Null;
+
+      while Actuelle /= Null loop
+         if Actuelle.Frequence < Min then
+            Min := Actuelle.Frequence;
+            Cellule := Actuelle;
+            Cellule_prec := Actuelle_prec;
+         else
+            Null;
          end if;
+         Actuelle_prec := Actuelle;
+         Actuelle := Actuelle.suivant;
+      end loop;
+
+      if Cellule_prec = Null then
+         Liste := Liste.Suivant;
+      else
+         Cellule_prec.Suivant := Cellule.Suivant;
+      end if;
+      Free(Cellule);
    end Elimination_LFU;
 
 
@@ -308,8 +318,6 @@ package body LISTES is
          Afficher_Adresse_IP (Actuelle.Masque);
          Put(" , Interface : ");
          Afficher_Int(Actuelle.Int);
-         Put(" , frequence : ");
-         Put(Actuelle.Frequence, 0);
          Put("]");
          New_Line;
          Actuelle := Actuelle.Suivant;

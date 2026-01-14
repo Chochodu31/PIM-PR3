@@ -43,6 +43,7 @@ package LISTES is
       with function inf(Masque_nouv : in T_Adresse_IP; Masque : in T_Adresse_IP) return Boolean;
       with procedure Rien(Masque : in out T_Adresse_IP);
       with procedure Rien_Interface(Inter : in out T_interface);
+      --  with procedure Afficher_Adresse_IP(Adresse_IP : in T_Adresse_IP);
    procedure association_liste(Liste: in T_Liste; Adresse_IP : in T_Adresse_IP; Association : in out Integer; Int : out T_interface; Adresse : out T_Liste; Masque : out T_Adresse_IP);
    
    procedure Elimination(Liste: in out T_Liste; politique : in Tab_Politique);
