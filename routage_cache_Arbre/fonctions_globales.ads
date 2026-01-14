@@ -74,6 +74,10 @@ package Fonctions_globales is
    function Association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String;
 
 
+   -- Écrire dans le fichier de sortie l'adresse IP et l'interface associée
+   procedure Ecrire (Sortie : in out File_Type; Adresse_IP : in T_Adresse_IP; Int : in String);
+
+
    -- Identifier la commande écrite
    -- Exception : Commande_Inconnu_Error si la ligne de commande ne respecte pas les critères demandés
    procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_LCA);

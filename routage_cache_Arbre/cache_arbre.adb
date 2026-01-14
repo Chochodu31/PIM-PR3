@@ -1,7 +1,5 @@
 with Ada.Text_IO;             use Ada.Text_IO;
-with Ada.Integer_Text_IO;     use Ada.Integer_Text_IO;
 with SDA_Exceptions;          use SDA_Exceptions;
-with Fonctions_globales;      use Fonctions_globales;
 with Ada.Unchecked_Deallocation;
 
 package body Cache_Arbre is
@@ -221,9 +219,17 @@ package body Cache_Arbre is
       return Noeud;
    end Trouver_Noeud;
 
+   -- Supprimer la route la moins récemment utilisée (politique LRU)
    procedure Supprimer_LRU(Cache : in out T_Cache) is
+      Noeud_A_Supprimer : T_Trie;
    begin
-      Supprimer_FIFO(Cache);
+      if Cache.Racine /= null and Cache.Taille_Actuelle > 0 then
+         Noeud_A_Supprimer := Trouver_Plus_Ancien(Cache.Racine);
+         if Noeud_A_Supprimer /= null then
+            Noeud_A_Supprimer.Est_Route := False;
+            Cache.Taille_Actuelle := Cache.Taille_Actuelle - 1;
+         end if;
+      end if;
    end Supprimer_LRU;
 
    -- Supprimer la route la moins fréquemment utilisée
