@@ -1,0 +1,36 @@
+===================================================================
+      DÉMONSTRATION DU PROJET ROUTEUR (PIM) - PR03
+===================================================================
+
+
+Fichiers utilisés :
+ - table.txt   : Table de routage (4 règles)
+ - paquets.txt : Scénario de test (7 demandes d'IP, avec répétition)
+
+
+
+
+-------------------------------------------------------------------
+1. COMPILATION
+-------------------------------------------------------------------
+$ gnatmake -o routeur_LA routeur_LA.adb
+
+-------------------------------------------------------------------
+2. TEST POLITIQUE "FIFO" (Taille 2)
+-------------------------------------------------------------------
+$ ./routeur_LA -c 2 -p FIFO -t table.txt -q paquets.txt -r resultats_fifo.txt -s
+
+-------------------------------------------------------------------
+3. TEST POLITIQUE "LRU" (Taille 2)
+-------------------------------------------------------------------
+$ ./routeur_LA -c 2 -p LRU -t table.txt -q paquets.txt -r resultats_lru.txt -s
+
+-------------------------------------------------------------------
+4. TEST POLITIQUE "LFU" (Taille 2)
+-------------------------------------------------------------------
+$ ./routeur_LA -c 2 -p LFU -t table.txt -q paquets.txt -r resultats_lfu.txt -s
+
+-------------------------------------------------------------------
+5. VÉRIFICATION DE LA LIBÉRATION MÉMOIRE
+-------------------------------------------------------------------
+$ valgrind --leak-check=full ./routeur_LA -c 10 -p FIFO -t table.txt -q paquets.txt
