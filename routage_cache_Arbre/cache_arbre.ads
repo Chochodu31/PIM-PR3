@@ -5,8 +5,8 @@ package Cache_Arbre is
 
    type T_Cache is private;  
 
-   -- Initialiser un cache avec une taille maximale
-   procedure Initialiser(Cache : out T_Cache; Taille_Max : Integer);
+   -- Initialiser un cache avec une taille maximale et une politique
+   procedure Initialiser(Cache : out T_Cache; Taille_Max : Integer; Politique : Tab_Politique);
 
    -- Détruire le cache et libère la mémoire
    procedure Detruire(Cache : in out T_Cache);
@@ -15,7 +15,8 @@ package Cache_Arbre is
    function Taille(Cache : T_Cache) return Integer;
 
    -- Rechercher une adresse IP dans le cache, lève Cle_Absente_Error si absente
-   function Rechercher(Cache : in out T_Cache; Adresse_IP : T_Adresse_IP) return Unbounded_String;
+   -- Retourne la route complète trouvée
+   function Rechercher(Cache : in out T_Cache; Adresse_IP : T_Adresse_IP) return T_Case;
 
    -- Ajouter une route au cache
    procedure Enregistrer(Cache : in out T_Cache; Destination, Masque : T_Adresse_IP; Interf : Unbounded_String);
@@ -23,20 +24,8 @@ package Cache_Arbre is
    -- Supprimer une route spécifique du cache
    procedure Supprimer(Cache : in out T_Cache; Destination, Masque : T_Adresse_IP);
 
-   -- Supprimer la route la plus ancienne (politique FIFO)
-   procedure Supprimer_FIFO(Cache : in out T_Cache);
-
-   -- Supprimer la route la moins récemment utilisée (politique LRU)
-   procedure Supprimer_LRU(Cache : in out T_Cache);
-
-   -- Supprimer la route la moins fréquemment utilisée (politique LFU)
-   procedure Supprimer_LFU(Cache : in out T_Cache);
-
-   -- Mettre à jour clk d'une route (pour LRU)
-   procedure Mettre_A_Jour_LRU(Cache : in out T_Cache; Destination, Masque : T_Adresse_IP);
-
-   -- Incrémenter le compteur d'accès d'une route (pour LFU)
-   procedure Mettre_A_Jour_LFU(Cache : in out T_Cache; Destination, Masque : T_Adresse_IP);
+   -- Mettre à jour une route selon la politique (LRU/LFU)
+   procedure Mettre_A_Jour(Cache : in out T_Cache; Destination, Masque : T_Adresse_IP);
 
    -- Afficher toutes les routes du cache
    procedure Afficher(Cache : in T_Cache);
@@ -55,7 +44,7 @@ private
       Route      : T_Case;             -- Route stockée (Destination, Masque, Interface)
       Est_Route  : Boolean := False;   -- Vrai si ce nœud représente une route valide
       Enfants    : T_Tableau_Enfants := (others => null);  -- Enfants pour les bits 0 et 1
-      Clk        : Integer;            -- compteur pour FIFO/LRU
+      Horloge    : Integer;            -- compteur pour FIFO/LRU
       Frequence  : Integer;            -- Compteur d'accès pour LFU
    end record;
 
@@ -64,14 +53,18 @@ private
       Racine        : T_Trie := null;   -- Racine de l'arbre
       Taille_Max    : Integer;          -- Taille maximale du cache
       Taille_Actuelle : Integer;        -- Nombre actuel de routes
-      Horloge       : Integer;          -- Horloge globale 
+      Horloge_Global : Integer;         -- Horloge globale 
       Nb_Defauts    : Integer;          -- Nombre de défauts de cache
       Nb_Demandes   : Integer;          -- Nombre total de demandes
+      Politique     : Tab_Politique;    -- Politique de remplacement
    end record;
 
    -- Fonctions utilitaires internes
-   function Trouver_Noeud(Racine : T_Trie; Destination, Masque : T_Adresse_IP) return T_Trie;
+   function Trouver_Noeud(Racine : T_Trie; Destination : T_Adresse_IP; Longueur_Masque : Natural) return T_Trie;
    function Trouver_Plus_Ancien(Racine : T_Trie) return T_Trie;
+   function Trouver_Moins_Frequent(Racine : T_Trie) return T_Trie;
    procedure Liberer_Sous_Arbre(Noeud : in out T_Trie);
+   function Calculer_Longueur_Masque(Masque : T_Adresse_IP) return Natural;
+   function Extraire_Bit(Adresse : T_Adresse_IP; Position : Natural) return Natural;
 
 end Cache_Arbre;

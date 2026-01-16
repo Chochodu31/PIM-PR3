@@ -69,9 +69,9 @@ package Fonctions_globales is
    procedure Ouvrir (Paquet : in String; Entree : in out File_Type);
 
 
-   -- Association de l'adresse IP et de Destination dans la table de routage.
-   -- Exception : Adresse_IP_Introuvable_Error si il n'y à pas de Destination et de Masque qui correspondent à l'adresse IP
-   function Association_ad_des (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return Unbounded_String;
+   -- Trouver la meilleure route pour une adresse IP (préfixe le plus long)
+   -- Exception : Adresse_IP_Introuvable_Error si aucune route ne correspond
+   function Trouver_Meilleure_Route (Tab_Routage : in T_LCA; Adresse_IP : in T_Adresse_IP) return T_Case;
 
 
    -- Écrire dans le fichier de sortie l'adresse IP et l'interface associée
