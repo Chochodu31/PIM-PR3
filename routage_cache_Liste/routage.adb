@@ -3,6 +3,7 @@ with Ada.Strings.Unbounded; 	use Ada.Strings.Unbounded;
 with Fonctions_globales;   use Fonctions_globales;
 use Fonctions_globales.Routeur_cache;
 with ada.Integer_Text_IO;  use ada.Integer_Text_IO;
+with ada.Float_Text_IO; use ada.Float_Text_IO;
 
 procedure Routage is
 
@@ -16,6 +17,9 @@ procedure Routage is
    Entree : File_Type;  -- Fichier d'entrée
 	Sortie : File_Type;  -- Fichier de sortie
    Cache : T_Liste;  -- Table de cache
+   Nb_demande : Integer;
+   Nb_defaut : Integer;
+   taux : Float;
 	
 begin
    -- Comprendre la ligne de commande
@@ -34,7 +38,7 @@ begin
 
 
    -- Traiter les paquets à router
-   Traiter_les_paquets (Entree, Sortie, Tab_routage, Cache, Politique, Cache_Taille);
+   Traiter_les_paquets (Entree, Sortie, Tab_routage, Cache, Politique, Cache_Taille, Nb_demande, Nb_defaut);
 
 
    -- Fermer les fichiers
@@ -42,28 +46,21 @@ begin
 	Close (Sortie);
    Detruire(Tab_routage);
 
-
    -- Agir sur la ligne de commande
    -- Agir selon Statistique
    if Statistique then
       New_Line;
-      Put("Rien à afficher car pas encore de cache");
+      Put("Nombre de demande de routage : ");
+      Put(Nb_demande, 2);
+      New_Line;
+      Put("Nombre de défeut de Cache : ");
+      Put(Nb_defaut, 2);
+      New_Line;
+      Put("Taux de défaut de cache : ");
+      taux := Float(Nb_defaut) / Float(Nb_demande);
+      Put(taux);
    else
       Null;
    end if;
 
-   -- Agir selon Cache
-   New_Line;
-   Put("Taille cache : ");
-   Put(Cache_Taille, 2);
-
-   -- Agir selon Politique
-   New_Line;
-   if Politique = FIFO then
-      Put("La politique choisi : FIFO");
-   elsif Politique = LRU then
-      Put("Politique choisi : LRU");
-   else
-      Put("Politique choisi : LFU");
-   end if;
 end Routage;

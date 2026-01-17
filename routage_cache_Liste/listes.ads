@@ -1,4 +1,4 @@
-with Interfaces;
+
 generic
    type T_interface is private;
    type T_Adresse_IP is private;
@@ -34,18 +34,34 @@ package LISTES is
       with function Produit(Destination : in T_Adresse_IP; Int : in Integer) return T_Adresse_IP;
       with procedure Association_int(Masque : in out T_Adresse_IP; Int : in Integer);
       with procedure Rien(Masque : in out T_Adresse_IP);
-   procedure Dest_Masq_Max(Routage : in T_Liste; Cellule : in T_Liste; Adresse_IP : in T_Adresse_IP; Masque : out T_Adresse_IP; Destination : out T_Adresse_IP);
+   procedure Dest_Masq_Max(Routage : in T_Liste; Cellule : in T_Liste; Adresse_IP : in T_Adresse_IP; Masque : in out T_Adresse_IP; Destination : out T_Adresse_IP);
 
    -- Enregistrer une valeur dans la liste
    --  procedure Enregistrer_routage(liste : in out T_Liste; Frequence : Integer; Destination : T_Adresse_IP; Masque : T_Adresse_IP; Int : T_interface);
    generic
       with function Et(Adresse_IP : in T_Adresse_IP; Masque : in T_Adresse_IP) return T_Adresse_IP;
       with function inf(Masque_nouv : in T_Adresse_IP; Masque : in T_Adresse_IP) return Boolean;
-   procedure association_liste(Liste: in T_Liste; Adresse_IP : in T_Adresse_IP; Association : in out Integer; Int : out T_interface; Adresse : out T_Liste);
+      with procedure Rien(Masque : in out T_Adresse_IP);
+      with procedure Rien_Interface(Inter : in out T_interface);
+      --  with procedure Afficher_Adresse_IP(Adresse_IP : in T_Adresse_IP);
+   procedure association_liste(Liste: in T_Liste; Adresse_IP : in T_Adresse_IP; Association : in out Integer; Int : out T_interface; Adresse : out T_Liste; Masque : out T_Adresse_IP);
    
    procedure Elimination(Liste: in out T_Liste; politique : in Tab_Politique);
    
    function Taille(Liste : in T_Liste) return Integer;
+
+   function Avoir_Int(Cellule : in T_Liste) return T_interface;
+
+   function Avoir_Des(Cellule : in T_Liste) return T_Adresse_IP;
+
+   procedure Elimination_FIFO(Liste : in out T_Liste);
+
+   procedure Elimination_LRU(Liste : in out T_Liste);
+
+   procedure Elimination_LFU(Liste : in out T_Liste);
+
+   function Presence_fin(Liste : in T_Liste; Cellule : in T_Liste) return Boolean;
+   function Presence(Liste : in T_Liste; Cellule : in T_Liste) return Boolean;
 private
    type T_Cellule;
 

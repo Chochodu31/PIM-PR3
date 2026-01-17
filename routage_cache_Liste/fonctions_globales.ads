@@ -8,12 +8,12 @@ package Fonctions_globales is
    type T_Adresse_IP is mod 2 ** 32;
    UN_OCTET: constant T_Adresse_IP := 2 ** 8;
    package Adresse_IP_IO is new Modular_IO (T_Adresse_IP);
-
+   POIDS_FORT_ICI : constant T_Adresse_IP  := 2 ** 31;
 
    package Routeur_cache is new LISTES (
       T_interface => Unbounded_String,
       T_Adresse_IP => T_Adresse_IP,
-      POIDS_FORT => 2 ** 31
+      POIDS_FORT => POIDS_FORT_ICI
    );
    use Routeur_cache;
 
@@ -28,14 +28,19 @@ package Fonctions_globales is
 
    function inf_ici(Masque_nouv : in T_Adresse_IP; Masque : in T_Adresse_IP) return Boolean;
    function Et_ici (Adresse_IP : in T_Adresse_IP; Masque : in T_Adresse_IP) return T_Adresse_IP;
+   procedure Rien_ici(Masque : in out T_Adresse_IP);
+   procedure Rien_Interface_Ici(Inter : in out Unbounded_String);
    procedure Asso is new association_liste(
       Et => Et_ici,
-      inf => inf_ici
+      inf => inf_ici,
+      Rien => Rien_ici,
+      Rien_Interface => Rien_Interface_Ici
+      --  Afficher_Adresse_IP => Afficher_Ad_IP
    );
 
    function Produit_ici(Destination : in T_Adresse_IP; bit : in Integer) return T_Adresse_IP;
    procedure Asso_ici(Masque : in out T_Adresse_IP; Int : in Integer);
-   procedure Rien_ici(Masque : in out T_Adresse_IP);
+   
    procedure Dest is new Dest_Masq_Max(
       Et => Et_ici,
       Produit => produit_ici,
@@ -44,7 +49,7 @@ package Fonctions_globales is
    );
 
 
-   procedure Ajout_cache(Routage: in T_Liste; Cellule : in T_Liste; Adresse_IP : in T_Adresse_IP; Cache : in out T_Liste; politique : in Tab_politique; Cache_Taille : in Integer);
+   procedure Ajout_cache(Routage: in T_Liste; Cellule : in T_Liste; Adresse_IP : in T_Adresse_IP; Cache : in out T_Liste; politique : in Tab_politique; Cache_Taille : in Integer; Masque : in out T_Adresse_IP);
 
 
    -- Créer la table de routage à partir d'un fichier
@@ -69,11 +74,11 @@ package Fonctions_globales is
 
 
    -- Traiter les paquets à router
-   procedure Traiter_les_paquets (Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_Liste; Cache : in out T_Liste; Politique : in Tab_Politique ; Cache_Taille : in integer);
+   procedure Traiter_les_paquets (Entree : in File_Type; Sortie : in out File_Type; Tab_routage : in T_Liste; Cache : in out T_Liste; Politique : in Tab_Politique ; Cache_Taille : in integer; Nb_demande : out Integer; Nb_defaut : out Integer);
    
    function Id_ad_IP(Texte : in String) return T_Adresse_IP;
    
-   function association_ad_des (Cache : in out T_Liste; Tab_Routage : in T_Liste; Adresse_IP : in T_Adresse_IP; Politique : in Tab_Politique; Cache_Taille : in integer) return Unbounded_String;
+   function association_ad_des (Cache : in out T_Liste; Tab_Routage : in T_Liste; Adresse_IP : in T_Adresse_IP; Politique : in Tab_Politique; Cache_Taille : in integer; Nb_defaut : in out Integer) return Unbounded_String;
    
    procedure Identifier_commande (Texte : in String; Ligne : in Integer; Tab_routage : in T_Liste; Cache : in T_Liste);
    
