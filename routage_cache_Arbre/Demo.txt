@@ -1,0 +1,80 @@
+===================================================================
+      DÉMONSTRATION DU PROJET ROUTEUR AVEC CACHE (ARBRE)
+===================================================================
+
+Pré-requis :
+ - Exécutable : routeur_la
+ - table.txt   
+ - paquets.txt 
+
+-------------------------------------------------------------------
+1. COMPILATION
+-------------------------------------------------------------------
+$ gnatmake routeur_la.adb
+
+-------------------------------------------------------------------
+2. TEST DU MÉCANISME Masque le plus long
+-------------------------------------------------------------------
+Vérification avec l'IP : 147.127.18.80
+ - Règle 1 : 147.127.0.0 / 16 -> eth1
+ - Règle 2 : 147.127.18.0 / 24 -> eth0
+Résultat attendu : Le routeur doit choisir eth0 car le masque /24 
+est plus précis que le masque /16.
+
+Vérification dans resultats.txt :
+147.127.18.80 eth0  <-- (Succès LPM)
+
+-------------------------------------------------------------------
+3. TEST POLITIQUES CACHE (Taille du cache = 3)
+-------------------------------------------------------------------
+Scenario basé sur tes paquets :
+ 1. 212.212.212.212 -> MISS (Route par défaut 0.0.0.0 -> eth0)
+ 2. 147.127.18.80   -> MISS (LPM -> eth0)
+ 3. 147.127.18.85   -> MISS (LPM -> eth0)
+ 4. 147.127.18.85   -> HIT  (Déjà dans le cache !)
+ 5. 147.127.19.1    -> MISS (Cache plein, suppression nécessaire)
+ 6. 147.127.20.20   -> MISS
+ 7. 147.127.32.32   -> MISS
+
+Commande :
+$ ./routeur_la -c 3 -p FIFO -t table.txt -q paquets.txt -r resultats.txt
+
+> RÉSULTATS ATTENDUS (Affichage -s) :
+  --- Statistiques internes du cache ---
+  Total demandes: 7
+  Total défauts:  6
+  --- Statistiques manuelles ---
+  Total Hits:     1  
+  Total Misses:   6
+
+-------------------------------------------------------------------
+4. FONCTIONNEMENT DE LA SUPPRESSION (FIFO vs LRU)
+-------------------------------------------------------------------
+À l'étape 5 (IP 147.127.19.1), le cache de taille 3 est plein : 
+[212.212.212.212, 147.127.18.80, 147.127.18.85]
+
+- En FIFO : La première IP entrée (212.212.212.212) est supprimée.
+- En LRU  : L'IP la moins récemment utilisée est supprimée. 
+            Comme 147.127.18.85 vient d'être utilisée (HIT), elle est 
+            protégée et reste en haut de la pile.
+
+-------------------------------------------------------------------
+5. MODE INTERACTIF (Commande 'table')
+-------------------------------------------------------------------
+Ton fichier paquets.txt commence par 'table'.
+Le programme doit afficher la table de routage complète au début 
+du traitement dans le terminal.
+
+> AFFICHAGE ATTENDU :
+-->[1 : (147.127.0.0, 255.255.0.0, eth1)]
+-->[2 : (147.127.18.0, 255.255.255.0, eth0)]
+...etc
+
+-------------------------------------------------------------------
+6. VÉRIFICATION MÉMOIRE
+-------------------------------------------------------------------
+$ valgrind --leak-check=full ./routeur_la -c 3 -p FIFO -t table.txt -q paquets.txt
+
+> ATTENDU :
+  "All heap blocks were freed -- no leaks are possible"
+  L'arbre (Cache) et la liste (Table) sont correctement désalloués.
