@@ -16,13 +16,23 @@ package body Cache_Arbre is
       end case;
    end Politique_To_String;
 
-   function Calculer_Longueur_Masque(Masque : T_Adresse_IP) return Natural is
+function Calculer_Longueur_Masque(Masque : T_Adresse_IP) return Natural is
       Longueur : Natural := 0;
-      Temp : T_Adresse_IP := Masque;
+      Bit_Test : T_Adresse_IP;
+      Stop : Boolean := False;
    begin
-      while Temp > 0 loop
-         Longueur := Longueur + 1;
-         Temp := Temp / 2;
+      -- Parcours de 31 à 0
+      for I in reverse 0..31 loop
+         if not Stop then
+             Bit_Test := 2**I;
+             if (Masque and Bit_Test) /= 0 then
+                Longueur := Longueur + 1;
+             else
+                Stop := True;
+             end if;
+         else
+             null;
+         end if;
       end loop;
       return Longueur;
    end Calculer_Longueur_Masque;
@@ -101,7 +111,6 @@ package body Cache_Arbre is
       Position : Integer := 31;
    begin
       Cache.Nb_Demandes := Cache.Nb_Demandes + 1;
-
       while Position >= 0 and then Noeud /= null loop
          if Noeud.Est_Route then
             if (Adresse_IP and Noeud.Route.Masque) = Noeud.Route.Destination then
@@ -116,19 +125,15 @@ package body Cache_Arbre is
                end;
             end if;
          end if;
-         
          Bit := Extraire_Bit(Adresse_IP, Position);
          Noeud := Noeud.Enfants(Bit);
          Position := Position - 1;
       end loop;
-      
       if not Trouvee then
          Cache.Nb_Defauts := Cache.Nb_Defauts + 1;
          raise Cle_Absente_Error;
       end if;
-      
       Mettre_A_Jour(Cache, Meilleure_Route.Destination, Meilleure_Route.Masque);
-      
       return Meilleure_Route;
    end Rechercher;
 
@@ -158,7 +163,6 @@ package body Cache_Arbre is
       Resultat : T_Trie := null;
       Min_Frequence : Integer := Integer'Last;
       Min_Horloge : Integer := Integer'Last;
-      
       procedure Parcours(Noeud : T_Trie) is
       begin
          if Noeud /= null then
@@ -203,65 +207,58 @@ package body Cache_Arbre is
       end if;
    end Supprimer_Route_Selon_Politique;
 
-   procedure Enregistrer(Cache : in out T_Cache; Destination, Masque : T_Adresse_IP; Interf : Unbounded_String) is
+procedure Enregistrer(Cache : in out T_Cache; Destination, Masque : T_Adresse_IP; Interf : Unbounded_String) is
       Longueur_Masque : Natural;
       Noeud : T_Trie;
       Bit : Natural;
       Position : Integer := 31;
+      Arret_Boucle : Boolean := False;
    begin
       Longueur_Masque := Calculer_Longueur_Masque(Masque);
-      
       Noeud := Trouver_Noeud(Cache.Racine, Destination, Longueur_Masque);
-      
       if Noeud /= null and then Noeud.Est_Route then
          Noeud.Route.Int := Interf;
          Noeud.Horloge := Cache.Horloge_Global;
          Cache.Horloge_Global := Cache.Horloge_Global + 1;
-         return;
-      end if;
-      
-      if Cache.Taille_Max > 0 and Cache.Taille_Actuelle >= Cache.Taille_Max then
-         Supprimer_Route_Selon_Politique(Cache);
-      end if;
-      
-      if Cache.Racine = null then
-         Cache.Racine := new T_Noeud'(Route => (Destination => 0, Masque => 0, Int => Null_Unbounded_String),
-                                     Est_Route => False,
-                                     Enfants => (others => null),
-                                     Horloge => 0,
-                                     Frequence => 0);
-      end if;
-      
-      Noeud := Cache.Racine;
-      Position := 31;
-      
-      while Position >= 0 loop
-         if Position < 32 - Longueur_Masque then
-            exit;
+      else
+         if Cache.Taille_Max > 0 and Cache.Taille_Actuelle >= Cache.Taille_Max then
+             Supprimer_Route_Selon_Politique(Cache);
+         else
+             null;
          end if;
-         
-         Bit := Extraire_Bit(Destination, Position);
-         
-         if Noeud.Enfants(Bit) = null then
-            Noeud.Enfants(Bit) := new T_Noeud'(Route => (Destination => 0, Masque => 0, Int => Null_Unbounded_String),
-                                              Est_Route => False,
-                                              Enfants => (others => null),
-                                              Horloge => 0,
-                                              Frequence => 0);
+         if Cache.Racine = null then
+             Cache.Racine := new T_Noeud'(Route => (Destination => 0, Masque => 0, Int => Null_Unbounded_String), Est_Route => False, Enfants => (others => null), Horloge => 0, Frequence => 0);
+         else
+             null;
+         end if;  
+         Noeud := Cache.Racine;
+         Position := 31;
+         while Position >= 0 and not Arret_Boucle loop
+             if Position < 32 - Longueur_Masque then
+                Arret_Boucle := True;
+             else
+                 Bit := Extraire_Bit(Destination, Position);
+                 if Noeud.Enfants(Bit) = null then
+                    Noeud.Enfants(Bit) := new T_Noeud'(Route => (Destination => 0, Masque => 0, Int => Null_Unbounded_String), Est_Route => False, Enfants => (others => null), Horloge => 0, Frequence => 0);
+                 else
+                    null;
+                 end if;
+                 
+                 Noeud := Noeud.Enfants(Bit);
+                 Position := Position - 1;
+             end if;
+         end loop;
+         if not Noeud.Est_Route then
+             Cache.Taille_Actuelle := Cache.Taille_Actuelle + 1;
+         else
+             null;
          end if;
-         Noeud := Noeud.Enfants(Bit);
-         Position := Position - 1;
-      end loop;
-      
-      if not Noeud.Est_Route then
-         Cache.Taille_Actuelle := Cache.Taille_Actuelle + 1;
+         Noeud.Est_Route := True;
+         Noeud.Route := (Destination => Destination, Masque => Masque, Int => Interf);
+         Noeud.Horloge := Cache.Horloge_Global;
+         Noeud.Frequence := 0;
+         Cache.Horloge_Global := Cache.Horloge_Global + 1;
       end if;
-      
-      Noeud.Est_Route := True;
-      Noeud.Route := (Destination => Destination, Masque => Masque, Int => Interf);
-      Noeud.Horloge := Cache.Horloge_Global;
-      Noeud.Frequence := 0;
-      Cache.Horloge_Global := Cache.Horloge_Global + 1;
    end Enregistrer;
 
    procedure Mettre_A_Jour(Cache : in out T_Cache; Destination, Masque : T_Adresse_IP) is
@@ -270,7 +267,6 @@ package body Cache_Arbre is
    begin
       Longueur_Masque := Calculer_Longueur_Masque(Masque);
       Noeud := Trouver_Noeud(Cache.Racine, Destination, Longueur_Masque);
-      
       if Noeud /= null and then Noeud.Est_Route then
          case Cache.Politique is
             when LRU =>
